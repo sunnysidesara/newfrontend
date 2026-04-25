@@ -24,11 +24,6 @@ interface UserProfile {
   email: string;
   role: "innovator" | "investor";
   bio: string | null;
-  status:
-    | "looking_for_investor"
-    | "looking_to_collaborate"
-    | "open_to_connect"
-    | null;
   avatar_url: string | null;
   created_at: string;
 }
@@ -93,7 +88,6 @@ export default function ProfilePage() {
   const [loading, setLoading] = useState(true);
   const [isEditing, setIsEditing] = useState(false);
   const [bio, setBio] = useState("");
-  const [status, setStatus] = useState("");
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
@@ -119,7 +113,6 @@ export default function ProfilePage() {
 
         setProfile(profileData.user);
         setBio(profileData.user.bio ?? "");
-        setStatus(profileData.user.status ?? "");
         setUserPosts(postsData.posts ?? []);
       } catch (error) {
         console.error("Error fetching profile:", error);
@@ -138,10 +131,10 @@ export default function ProfilePage() {
       const res = await fetch(`${apiUrl}/users/${id}`, {
         method: "PUT",
         headers: {
-          "Content-Type": "application/json", // ← Fixed: added opening quote
+          "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify({ bio, status }),
+        body: JSON.stringify({ bio }), // Removed status
       });
       const data = await res.json();
       setProfile(data.user);
@@ -256,17 +249,12 @@ export default function ProfilePage() {
                 </span>
               </div>
 
-              {profile.status && (
-                <div className="profile-status-pill">
-                  <span className="profile-status-dot" />
-                  {profile.status.replace(/_/g, " ")}
-                </div>
-              )}
+              {/* Status section REMOVED */}
 
               <div className="profile-meta-row">
                 <span className="profile-meta-item">✉ {profile.email}</span>
                 <span className="profile-meta-item">
-                  📅 Joined{" "}
+                  🗓 Joined{" "}
                   {new Date(profile.created_at).toLocaleDateString("en-US", {
                     month: "long",
                     year: "numeric",
@@ -288,20 +276,7 @@ export default function ProfilePage() {
                   placeholder="Tell your story..."
                   rows={4}
                 />
-                <select
-                  className="profile-select"
-                  value={status}
-                  onChange={(e) => setStatus(e.target.value)}
-                >
-                  <option value="">No status</option>
-                  <option value="looking_for_investor">
-                    🔍 Looking for Investor
-                  </option>
-                  <option value="looking_to_collaborate">
-                    🤝 Looking to Collaborate
-                  </option>
-                  <option value="open_to_connect">🌐 Open to Connect</option>
-                </select>
+                {/* Status dropdown REMOVED */}
                 {saved && (
                   <div className="profile-success-msg">
                     <Check size={14} />

@@ -18,6 +18,8 @@ import {
   X,
   LogOut,
   LayoutDashboard,
+  Key,
+  Mail
 } from "lucide-react";
 import "../admin.css";
 
@@ -58,6 +60,14 @@ function AdminNav() {
             <FileText size={16} />
             Posts
           </Link>
+           <Link
+  href="/admin/messages"
+  className="admin-nav-link"
+  onClick={() => setActiveTab("messages")}
+>
+  <Mail size={16} />
+  Messages
+</Link>
           <Link href="/feed" className="admin-nav-link">
             <Home size={16} />
             Back to Feed
@@ -80,8 +90,9 @@ function AdminNav() {
 }
 
 export default function AdminUsers() {
-  const { user } = useContext(AuthContext);
-  const { fetchUsers, deleteUser, updateUserRole } = useContext(AdminContext);
+  const { user, loading: authLoading } = useContext(AuthContext);
+  const { fetchUsers, deleteUser, updateUserRole, updateUser } =
+    useContext(AdminContext);
   const [users, setUsers] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [showCreateModal, setShowCreateModal] = useState(false);
@@ -90,9 +101,20 @@ export default function AdminUsers() {
   );
   const [showRoleModal, setShowRoleModal] = useState<{
     id: number;
+    name: string;
     role: string;
     isAdmin: boolean;
   } | null>(null);
+  const [showEditModal, setShowEditModal] = useState<{
+    id: number;
+    name: string;
+    email: string;
+  } | null>(null);
+  const [editEmail, setEditEmail] = useState("");
+  const [editPassword, setEditPassword] = useState("");
+  const [editConfirmPassword, setEditConfirmPassword] = useState("");
+  const [editError, setEditError] = useState("");
+  const [updating, setUpdating] = useState(false);
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -103,12 +125,12 @@ export default function AdminUsers() {
   const [submitting, setSubmitting] = useState(false);
   const router = useRouter();
 
+  // Wait for auth to finish loading
   useEffect(() => {
-    if (user && !user.is_admin) {
-      router.push("/feed");
+    if (!authLoading && user?.is_admin) {
+      loadUsers();
     }
-    loadUsers();
-  }, [user]);
+  }, [authLoading, user]);
 
   const loadUsers = async () => {
     setLoading(true);
@@ -121,7 +143,7 @@ export default function AdminUsers() {
     e.preventDefault();
     setSubmitting(true);
     try {
-      await fetch("/api/admin/users", {
+      await fetch(`${process.env.NEXT_PUBLIC_API_URL}/admin/users`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -160,6 +182,51 @@ export default function AdminUsers() {
     loadUsers();
   };
 
+  const handleEditClick = (u: any) => {
+    setShowEditModal({
+      id: u.id,
+      name: u.name,
+      email: u.email,
+    });
+    setEditEmail(u.email);
+    setEditPassword("");
+    setEditConfirmPassword("");
+    setEditError("");
+  };
+
+  const handleUpdateUser = async () => {
+    if (editPassword && editPassword !== editConfirmPassword) {
+      setEditError("Passwords do not match");
+      return;
+    }
+    if (editPassword && editPassword.length < 8) {
+      setEditError("Password must be at least 8 characters");
+      return;
+    }
+    setEditError("");
+    setUpdating(true);
+    try {
+      await updateUser(showEditModal!.id, editEmail, editPassword || undefined);
+      setShowEditModal(null);
+      loadUsers();
+      alert("User updated successfully!");
+    } catch (error) {
+      setEditError("Failed to update user");
+    }
+    setUpdating(false);
+  };
+
+  // Show loading while auth is being restored
+  if (authLoading) {
+    return (
+      <div className="admin-loading">
+        <div className="spinner"></div>
+        <p>Loading...</p>
+      </div>
+    );
+  }
+
+  // After loading is done, check if user is admin
   if (!user || !user.is_admin) {
     return (
       <ProtectedRoute>
@@ -225,9 +292,17 @@ export default function AdminUsers() {
                       <td className="actions-cell">
                         <button
                           className="icon-btn edit"
+                          onClick={() => handleEditClick(u)}
+                          title="Edit User (Email & Password)"
+                        >
+                          <Key size={16} />
+                        </button>
+                        <button
+                          className="icon-btn role"
                           onClick={() =>
                             setShowRoleModal({
                               id: u.id,
+                              name: u.name,
                               role: u.role,
                               isAdmin: u.is_admin,
                             })
@@ -308,16 +383,22 @@ export default function AdminUsers() {
                     <option value="innovator">Innovator</option>
                     <option value="investor">Investor</option>
                   </select>
-                  <label className="checkbox-label">
-                    <input
-                      type="checkbox"
-                      checked={formData.is_admin}
-                      onChange={(e) =>
-                        setFormData({ ...formData, is_admin: e.target.checked })
-                      }
-                    />
-                    Make this user an Admin
-                  </label>
+                  <div className="checkbox-row">
+                    <span className="checkbox-label-text">Add as admin?</span>
+                    <label className="checkbox-switch">
+                      <input
+                        type="checkbox"
+                        checked={formData.is_admin}
+                        onChange={(e) =>
+                          setFormData({
+                            ...formData,
+                            is_admin: e.target.checked,
+                          })
+                        }
+                      />
+                      <span className="checkbox-slider"></span>
+                    </label>
+                  </div>
                 </div>
                 <div className="modal-footer">
                   <button
@@ -354,6 +435,7 @@ export default function AdminUsers() {
                 </button>
               </div>
               <div className="modal-body">
+                <p className="modal-user-name">User: {showRoleModal.name}</p>
                 <select
                   value={showRoleModal.role}
                   onChange={(e) =>
@@ -363,19 +445,22 @@ export default function AdminUsers() {
                   <option value="innovator">Innovator</option>
                   <option value="investor">Investor</option>
                 </select>
-                <label className="checkbox-label">
-                  <input
-                    type="checkbox"
-                    checked={showRoleModal.isAdmin}
-                    onChange={(e) =>
-                      setShowRoleModal({
-                        ...showRoleModal,
-                        isAdmin: e.target.checked,
-                      })
-                    }
-                  />
-                  Admin Privileges
-                </label>
+                <div className="checkbox-row">
+                  <span className="checkbox-label-text">Add as admin?</span>
+                  <label className="checkbox-switch">
+                    <input
+                      type="checkbox"
+                      checked={showRoleModal.isAdmin}
+                      onChange={(e) =>
+                        setShowRoleModal({
+                          ...showRoleModal,
+                          isAdmin: e.target.checked,
+                        })
+                      }
+                    />
+                    <span className="checkbox-slider"></span>
+                  </label>
+                </div>
               </div>
               <div className="modal-footer">
                 <button
@@ -395,6 +480,61 @@ export default function AdminUsers() {
                   }
                 >
                   Update Role
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Edit User Modal (Email + Password) */}
+        {showEditModal && (
+          <div className="modal-overlay" onClick={() => setShowEditModal(null)}>
+            <div
+              className="modal-container"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="modal-header">
+                <h3>Edit User: {showEditModal.name}</h3>
+                <button onClick={() => setShowEditModal(null)}>
+                  <X size={18} />
+                </button>
+              </div>
+              <div className="modal-body">
+                <input
+                  type="email"
+                  placeholder="Email"
+                  value={editEmail}
+                  onChange={(e) => setEditEmail(e.target.value)}
+                  required
+                />
+                <input
+                  type="password"
+                  placeholder="New Password (leave blank to keep current)"
+                  value={editPassword}
+                  onChange={(e) => setEditPassword(e.target.value)}
+                />
+                <input
+                  type="password"
+                  placeholder="Confirm New Password"
+                  value={editConfirmPassword}
+                  onChange={(e) => setEditConfirmPassword(e.target.value)}
+                  disabled={!editPassword}
+                />
+                {editError && <p className="password-error">{editError}</p>}
+              </div>
+              <div className="modal-footer">
+                <button
+                  className="modal-cancel"
+                  onClick={() => setShowEditModal(null)}
+                >
+                  Cancel
+                </button>
+                <button
+                  className="modal-create"
+                  onClick={handleUpdateUser}
+                  disabled={updating}
+                >
+                  {updating ? "Updating..." : "Save Changes"}
                 </button>
               </div>
             </div>

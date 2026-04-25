@@ -31,6 +31,7 @@ interface AdminContextType {
     role: string,
     isAdmin: boolean,
   ) => Promise<void>;
+  updateUser: (userId: number, email: string, password?: string) => Promise<void>;
   deleteUser: (userId: number) => Promise<void>;
   deletePost: (postId: number) => Promise<void>;
 }
@@ -104,6 +105,22 @@ export function AdminProvider({ children }: { children: ReactNode }) {
     if (!res.ok) throw new Error("Failed to update user role");
   };
 
+  const updateUser = async (userId: number, email: string, password?: string) => {
+    const body: any = { email };
+    if (password) {
+      body.password = password;
+    }
+    const res = await fetch(`${API}/admin/users/${userId}`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify(body),
+    });
+    if (!res.ok) throw new Error("Failed to update user");
+  };
+
   const deleteUser = async (userId: number) => {
     const res = await fetch(`${API}/admin/users/${userId}`, {
       method: "DELETE",
@@ -120,6 +137,68 @@ export function AdminProvider({ children }: { children: ReactNode }) {
     if (!res.ok) throw new Error("Failed to delete post");
   };
 
+// Add to interface
+fetchAllMessages: () => Promise<any[]>;
+deleteMessage: (messageId: number) => Promise<void>;
+
+// Add to provider
+const fetchAllMessages = async () => {
+    const res = await fetch(`${API}/admin/messages`, {
+        headers: { Authorization: `Bearer ${token}` },
+    });
+    const data = await res.json();
+    return data.messages;
+};
+
+const deleteMessage = async (messageId: number) => {
+    const res = await fetch(`${API}/admin/messages/${messageId}`, {
+        method: "DELETE",
+        headers: { Authorization: `Bearer ${token}` },
+    });
+    if (!res.ok) throw new Error("Failed to delete message");
+};
+
+// Add to interface
+fetchAllComments: () => Promise<any[]>;
+deleteComment: (commentId: number) => Promise<void>;
+
+// Add to provider
+const fetchAllComments = async () => {
+    const res = await fetch(`${API}/admin/comments`, {
+        headers: { Authorization: `Bearer ${token}` },
+    });
+    const data = await res.json();
+    return data.comments;
+};
+
+const deleteComment = async (commentId: number) => {
+    const res = await fetch(`${API}/admin/comments/${commentId}`, {
+        method: "DELETE",
+        headers: { Authorization: `Bearer ${token}` },
+    });
+    if (!res.ok) throw new Error("Failed to delete comment");
+};
+
+// Add to interface
+updatePost: (postId: number, data: { title: string; body: string; status: string }) => Promise<void>;
+
+// Add to provider
+const updatePost = async (postId: number, data: { title: string; body: string; status: string }) => {
+    const res = await fetch(`${API}/admin/posts/${postId}`, {
+        method: "PUT",
+        headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(data),
+    });
+    if (!res.ok) throw new Error("Failed to update post");
+};
+
+// Add to provider value
+
+
+// Add to provider
   return (
     <AdminContext.Provider
       value={{
@@ -130,8 +209,14 @@ export function AdminProvider({ children }: { children: ReactNode }) {
         fetchAllPosts,
         createUser,
         updateUserRole,
+        updateUser,
         deleteUser,
         deletePost,
+        fetchAllMessages,
+deleteMessage,
+fetchAllComments,
+deleteComment,
+updatePost
       }}
     >
       {children}

@@ -25,7 +25,7 @@
 .textarea:focus,
 .select:focus {
   border-color: #0f172a;
-  box-shadow: 0 0 0 2px rgba(15, 23, 42, 0.05);
+  box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.05);
 }
 
 .textarea {
@@ -58,7 +58,7 @@
 }
 
 .submit:hover:not(:disabled) {
-  background: #1e293b;
+  background: #030406;
   transform: translateY(-1px);
 }
 

@@ -105,13 +105,13 @@
 }
 
 .admin-user-role.innovator {
-  background: #1a1a1a;
-  color: #22c55e;
+  background: #11002d;
+  color: #ededed;
 }
 
 .admin-user-role.investor {
-  background: #1a1a1a;
-  color: #60a5fa;
+  background: #013e11;
+  color: hsl(0, 0%, 99%);
 }
 
 .admin-logout-btn {
@@ -318,7 +318,7 @@
 
 .posts-count {
   font-weight: 700;
-  color: #22c55e;
+  color: #29ba5e;
 }
 
 .role-badge {
@@ -332,13 +332,13 @@
 }
 
 .role-badge.innovator {
-  background: #064e3b;
-  color: #22c55e;
+  background: #06012b;
+  color: #ecf3ee;
 }
 
 .role-badge.investor {
-  background: #1e3a5f;
-  color: #60a5fa;
+  background: #013414;
+  color: #ebeef1;
 }
 
 .admin-badge {
@@ -377,7 +377,7 @@
 }
 
 .icon-btn.edit {
-  color: #60a5fa;
+  color: #eff1f5;
 }
 
 .icon-btn.edit:hover {
@@ -385,7 +385,7 @@
 }
 
 .icon-btn.delete {
-  color: #dc2626;
+  color: #f71919;
 }
 
 .icon-btn.delete:hover {
@@ -476,13 +476,13 @@
 }
 
 .role-badge-small.innovator {
-  background: #1a1a1a;
-  color: #22c55e;
+  background: #020036;
+  color: #f5f4f7;
 }
 
 .role-badge-small.investor {
-  background: #1a1a1a;
-  color: #60a5fa;
+  background: #012c03;
+  color: #f5faf9;
 }
 
 .status-badge-small {
@@ -495,18 +495,18 @@
 }
 
 .status-badge-small.sharing_idea {
-  background: #78350f;
-  color: #fbbf24;
+  background: #331301;
+  color: #f8f6ef;
 }
 
 .status-badge-small.open_to_collaborate {
-  background: #064e3b;
-  color: #22c55e;
+  background: #030142;
+  color: #f1f3f1;
 }
 
 .status-badge-small.seeking_investment {
-  background: #1e3a5f;
-  color: #60a5fa;
+  background: #012d10;
+  color: #fdfdfd;
 }
 
 .empty-list,
@@ -578,18 +578,18 @@
 }
 
 .status-badge.sharing_idea {
-  background: #78350f;
-  color: #fbbf24;
+  background: #3d1802;
+  color: #f3f3f5;
 }
 
 .status-badge.open_to_collaborate {
-  background: #064e3b;
-  color: #22c55e;
+  background: #020335;
+  color: #f6f5fa;
 }
 
 .status-badge.seeking_investment {
-  background: #1e3a5f;
-  color: #60a5fa;
+  background: #022d16;
+  color: #e8ede8;
 }
 
 .admin-post-title {
@@ -902,4 +902,450 @@
     align-items: flex-start;
     gap: 12px;
   }
+}
+
+/* Password button */
+.icon-btn.password {
+  color: #ffee00;
+}
+
+.icon-btn.password:hover {
+  background: #1a1a1a;
+}
+
+/* Password error message */
+.password-error {
+  font-size: 12px;
+  color: #dc2626;
+  margin-top: 4px;
+}
+
+/* Modal user name display */
+.modal-user-name {
+  font-size: 14px;
+  font-weight: 500;
+  color: white;
+  margin-bottom: 12px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid #222222;
+}
+
+/* Checkbox Switch - Right aligned */
+.checkbox-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 0;
+  margin-top: 8px;
+}
+
+.checkbox-label-text {
+  font-size: 14px;
+  color: white;
+}
+
+/* Toggle Switch */
+.checkbox-switch {
+  position: relative;
+  display: inline-block;
+  width: 48px;
+  height: 24px;
+}
+
+.checkbox-switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.checkbox-slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #000000;
+  transition: 0.3s;
+  border-radius: 34px;
+}
+
+.checkbox-slider:before {
+  position: absolute;
+  content: "";
+  height: 18px;
+  width: 18px;
+  left: 3px;
+  bottom: 3px;
+  background-color: white;
+  transition: 0.3s;
+  border-radius: 50%;
+}
+
+.checkbox-switch input:checked + .checkbox-slider {
+  background-color: #530506;
+}
+
+.checkbox-switch input:checked + .checkbox-slider:before {
+  transform: translateX(24px);
+}
+
+/* =========================================================
+   MESSAGES LIST (ADMIN)
+   ========================================================= */
+.messages-list-admin {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.admin-message-item {
+  background: #0a0a0a;
+  border-radius: 12px;
+  padding: 16px;
+  border: 1px solid #222222;
+  transition: all 0.2s;
+}
+
+.admin-message-item:hover {
+  border-color: #333333;
+}
+
+.admin-message-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.admin-message-users {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.admin-message-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: #1a1a1a;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  color: white;
+  font-size: 14px;
+}
+
+.admin-message-sender {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.admin-message-name {
+  font-weight: 600;
+  color: white;
+  font-size: 13px;
+}
+
+.admin-message-label {
+  font-size: 11px;
+  color: #666666;
+}
+
+.admin-message-meta {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.admin-message-date {
+  font-size: 11px;
+  color: #666666;
+}
+
+.admin-delete-message {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 12px;
+  background: transparent;
+  border: 1px solid #dc2626;
+  border-radius: 30px;
+  color: #dc2626;
+  font-size: 11px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.admin-delete-message:hover {
+  background: #dc2626;
+  color: white;
+}
+
+.admin-message-content {
+  padding-left: 48px;
+}
+
+.admin-message-text {
+  font-size: 13px;
+  color: #aaaaaa;
+  line-height: 1.5;
+  word-break: break-word;
+}
+
+/* =========================================================
+   COMMENTS SECTION (ADMIN)
+   ========================================================= */
+.admin-post-badges {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.expand-comments-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  background: #1a1a1a;
+  border: 1px solid #333333;
+  border-radius: 30px;
+  font-size: 11px;
+  color: #aaaaaa;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.expand-comments-btn:hover {
+  background: #252525;
+  color: white;
+}
+
+.admin-comments-section {
+  margin-top: 16px;
+  padding-top: 12px;
+  border-top: 1px solid #222222;
+  background: #050505;
+  border-radius: 8px;
+  margin-bottom: 12px;
+}
+
+.admin-comments-header {
+  padding: 8px 12px;
+  border-bottom: 1px solid #222222;
+}
+
+.admin-comments-header h4 {
+  font-size: 12px;
+  font-weight: 600;
+  color: #888888;
+  margin: 0;
+}
+
+.admin-comments-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 12px;
+}
+
+.admin-comment-item {
+  background: #0a0a0a;
+  border-radius: 10px;
+  padding: 12px;
+  border: 1px solid #1a1a1a;
+}
+
+.admin-comment-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 8px;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.admin-comment-user {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.admin-comment-avatar {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: #1a1a1a;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  color: white;
+  font-size: 11px;
+}
+
+.admin-comment-name {
+  font-weight: 600;
+  color: white;
+  font-size: 12px;
+}
+
+.admin-comment-email {
+  font-size: 10px;
+  color: #666666;
+}
+
+.admin-comment-meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.admin-comment-date {
+  font-size: 10px;
+  color: #666666;
+}
+
+.admin-delete-comment {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 8px;
+  background: transparent;
+  border: 1px solid #dc2626;
+  border-radius: 30px;
+  color: #dc2626;
+  font-size: 10px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.admin-delete-comment:hover {
+  background: #dc2626;
+  color: white;
+}
+
+.admin-comment-body p {
+  font-size: 12px;
+  color: #aaaaaa;
+  line-height: 1.4;
+  margin: 0;
+  padding-left: 38px;
+}
+
+.admin-comments-empty {
+  padding: 16px 12px;
+  text-align: center;
+  color: #666666;
+  font-size: 12px;
+  background: #050505;
+  border-radius: 8px;
+  margin-top: 12px;
+}
+
+/* =========================================================
+   EDIT POST FORM (ADMIN)
+   ========================================================= */
+.admin-edit-form {
+  margin: 16px 0;
+  padding: 16px;
+  background: #0f0f0f;
+  border-radius: 12px;
+  border: 1px solid #2a2a2a;
+}
+
+.edit-input,
+.edit-textarea,
+.edit-select {
+  width: 100%;
+  padding: 10px 12px;
+  margin-bottom: 12px;
+  background: #1a1a1a;
+  border: 1px solid #333333;
+  border-radius: 8px;
+  font-size: 13px;
+  color: white;
+  font-family: inherit;
+}
+
+.edit-input:focus,
+.edit-textarea:focus,
+.edit-select:focus {
+  outline: none;
+  border-color: #555555;
+}
+
+.edit-textarea {
+  resize: vertical;
+}
+
+.edit-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 8px;
+}
+
+.edit-cancel {
+  padding: 8px 20px;
+  background: transparent;
+  border: 1px solid #444444;
+  border-radius: 30px;
+  font-size: 12px;
+  color: #aaaaaa;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.edit-cancel:hover {
+  background: #252525;
+  color: white;
+}
+
+.edit-save {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 20px;
+  background: #22c55e;
+  border: none;
+  border-radius: 30px;
+  font-size: 12px;
+  font-weight: 500;
+  color: white;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.edit-save:hover {
+  background: #16a34a;
+}
+
+.edit-save:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.edit-post-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  background: #1a1a1a;
+  border: 1px solid #3b82f6;
+  border-radius: 30px;
+  font-size: 11px;
+  color: #3b82f6;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.edit-post-btn:hover {
+  background: #3b82f6;
+  color: white;
 }

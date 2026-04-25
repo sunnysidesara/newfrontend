@@ -1,9 +1,10 @@
 "use client";
 
 import Link from "next/link";
-import { useState, useContext } from "react";
+import { useState, useContext, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { AuthContext } from "@/context/AuthContext";
+import { Eye, EyeOff } from "lucide-react";
 
 export default function SignupPage() {
   const { register } = useContext(AuthContext);
@@ -12,10 +13,50 @@ export default function SignupPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-  // role matches Laravel enum: 'innovator' | 'investor'
   const [role, setRole] = useState<"innovator" | "investor">("innovator");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+
+  // Password visibility states (default: hidden)
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+
+  // Load saved form data from sessionStorage
+  useEffect(() => {
+    const savedData = sessionStorage.getItem("signup_form_data");
+    if (savedData) {
+      const data = JSON.parse(savedData);
+      if (data.name) setName(data.name);
+      if (data.email) setEmail(data.email);
+      if (data.role) setRole(data.role);
+      sessionStorage.removeItem("signup_form_data");
+    }
+  }, []);
+
+  const saveFormData = () => {
+    const formData = { name, email, role };
+    sessionStorage.setItem("signup_form_data", JSON.stringify(formData));
+  };
+
+  const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setName(e.target.value);
+  };
+
+  const handleEmailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setEmail(e.target.value);
+  };
+
+  const handleRoleChange = (newRole: "innovator" | "investor") => {
+    setRole(newRole);
+  };
+
+  const togglePasswordVisibility = () => {
+    setShowPassword(!showPassword);
+  };
+
+  const toggleConfirmPasswordVisibility = () => {
+    setShowConfirmPassword(!showConfirmPassword);
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -33,6 +74,7 @@ export default function SignupPage() {
         password_confirmation: confirmPassword,
         role,
       });
+      sessionStorage.removeItem("signup_form_data");
       router.push("/feed");
     } catch (err: any) {
       setError(err.message || "Registration failed. Please try again.");
@@ -43,7 +85,6 @@ export default function SignupPage() {
 
   return (
     <main className="main">
-      {/* Header Section */}
       <header className="header">
         <div className="header-container">
           <div className="header-left">
@@ -83,18 +124,17 @@ export default function SignupPage() {
 
           {error && <p className="error-msg">{error}</p>}
 
-          {/* Role Selection */}
           <div className="role-select-group">
             <button
               type="button"
-              onClick={() => setRole("innovator")}
+              onClick={() => handleRoleChange("innovator")}
               className={`role-btn ${role === "innovator" ? "active" : ""}`}
             >
               Innovator
             </button>
             <button
               type="button"
-              onClick={() => setRole("investor")}
+              onClick={() => handleRoleChange("investor")}
               className={`role-btn ${role === "investor" ? "active" : ""}`}
             >
               Investor
@@ -102,62 +142,101 @@ export default function SignupPage() {
           </div>
 
           <form onSubmit={handleSubmit} className="auth-form">
-            <div className="form-group">
-              <label className="form-label">Full name</label>
-              <input
-                type="text"
-                placeholder="John Doe"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                className="form-input"
-                required
-              />
-            </div>
-            <div className="form-group">
-              <label className="form-label">Email address</label>
-              <input
-                type="email"
-                placeholder="you@example.com"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="form-input"
-                required
-              />
-            </div>
-            <div className="form-group">
-              <label className="form-label">Password</label>
-              <input
-                type="password"
-                placeholder="Create a password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="form-input"
-                required
-              />
-            </div>
-            <div className="form-group">
-              <label className="form-label">Confirm password</label>
-              <input
-                type="password"
-                placeholder="Confirm your password"
-                value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
-                className="form-input"
-                required
-              />
-            </div>
-            <div className="form-options">
+            <div className="form-options" style={{ marginBottom: 20 }}>
               <label className="checkbox-label">
                 <input type="checkbox" required /> I agree to the{" "}
-                <Link href="/terms" className="auth-link">
+                <Link
+                  href="/terms"
+                  onClick={saveFormData}
+                  className="auth-link"
+                >
                   Terms of Service
                 </Link>{" "}
                 and{" "}
-                <Link href="/privacy" className="auth-link">
+                <Link
+                  href="/privacy"
+                  onClick={saveFormData}
+                  className="auth-link"
+                >
                   Privacy Policy
                 </Link>
               </label>
             </div>
+
+            <div className="form-group">
+              <label className="form-label">Full name</label>
+              <input
+                type="text"
+                placeholder="ex. Rommel Carmona"
+                value={name}
+                onChange={handleNameChange}
+                className="form-input"
+                required
+              />
+            </div>
+
+            <div className="form-group">
+              <label className="form-label">Email address</label>
+              <input
+                type="email"
+                placeholder="ex. carmona@example.com"
+                value={email}
+                onChange={handleEmailChange}
+                className="form-input"
+                required
+              />
+            </div>
+
+            {/* Password Field */}
+            <div className="form-group">
+              <label className="form-label">Password</label>
+              <div className="password-input-wrapper">
+                <input
+                  type={showPassword ? "text" : "password"}
+                  placeholder="Create a password (atelast 8 characters)"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className="form-input password-input"
+                  required
+                />
+                <button
+                  type="button"
+                  onClick={togglePasswordVisibility}
+                  className="password-toggle-btn"
+                  tabIndex={-1}
+                >
+                  {showPassword ? <Eye size={18} /> : <EyeOff size={18} />}
+                </button>
+              </div>
+            </div>
+
+            {/* Confirm Password Field */}
+            <div className="form-group">
+              <label className="form-label">Confirm password</label>
+              <div className="password-input-wrapper">
+                <input
+                  type={showConfirmPassword ? "text" : "password"}
+                  placeholder="Confirm your password"
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  className="form-input password-input"
+                  required
+                />
+                <button
+                  type="button"
+                  onClick={toggleConfirmPasswordVisibility}
+                  className="password-toggle-btn"
+                  tabIndex={-1}
+                >
+                  {showConfirmPassword ? (
+                    <Eye size={18} />
+                  ) : (
+                    <EyeOff size={18} />
+                  )}
+                </button>
+              </div>
+            </div>
+
             <button
               type="submit"
               className="auth-btn-primary"

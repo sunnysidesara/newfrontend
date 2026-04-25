@@ -3,7 +3,6 @@ import { useState, useContext, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { AuthContext } from "@/context/AuthContext";
 import Link from "next/link";
-import "./settings.css";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import {
   Bell,
@@ -14,6 +13,9 @@ import {
   Save,
   X,
   Check,
+  Lock,
+  Eye,
+  EyeOff,
 } from "lucide-react";
 import "./settings.css";
 
@@ -39,6 +41,12 @@ function AppNav() {
             <Settings size={18} />
             <span>Settings</span>
           </Link>
+          {user?.is_admin && (
+            <Link href="/admin" className="settings-nav-link">
+              <User size={18} />
+              <span>Admin</span>
+            </Link>
+          )}
         </div>
         <div className="settings-nav-right">
           <button className="settings-icon-btn"></button>
@@ -63,14 +71,27 @@ export default function SettingsPage() {
   const router = useRouter();
   const apiUrl = process.env.NEXT_PUBLIC_API_URL;
 
+  // Profile fields
   const [name, setName] = useState(user?.name ?? "");
   const [email, setEmail] = useState(user?.email ?? "");
   const [bio, setBio] = useState(user?.bio ?? "");
-  const [status, setStatus] = useState(user?.status ?? "");
   const [role, setRole] = useState(user?.role ?? "innovator");
+
+  // Password fields - default to HIDDEN (false)
+  const [currentPassword, setCurrentPassword] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [showCurrentPassword, setShowCurrentPassword] = useState(false); // false = hidden
+  const [showNewPassword, setShowNewPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+
+  // UI states
   const [saving, setSaving] = useState(false);
+  const [savingPassword, setSavingPassword] = useState(false);
   const [saved, setSaved] = useState(false);
+  const [passwordSaved, setPasswordSaved] = useState(false);
   const [error, setError] = useState("");
+  const [passwordError, setPasswordError] = useState("");
   const [isLoggingOut, setIsLoggingOut] = useState(false);
 
   useEffect(() => {
@@ -78,7 +99,6 @@ export default function SettingsPage() {
       setName(user.name ?? "");
       setEmail(user.email ?? "");
       setBio(user.bio ?? "");
-      setStatus(user.status ?? "");
       setRole(user.role ?? "innovator");
     }
   }, [user]);
@@ -99,7 +119,6 @@ export default function SettingsPage() {
           name,
           email,
           bio,
-          status,
           role,
         }),
       });
@@ -111,7 +130,6 @@ export default function SettingsPage() {
 
       const data = await res.json();
 
-      // Update local user data in localStorage and context
       const storedUser = localStorage.getItem("ventur_user");
       if (storedUser) {
         const updatedUser = {
@@ -119,19 +137,65 @@ export default function SettingsPage() {
           name,
           email,
           bio,
-          status,
           role,
         };
         localStorage.setItem("ventur_user", JSON.stringify(updatedUser));
       }
 
-      // Update the user object in the AuthContext (optional - page will refresh data)
       setSaved(true);
       setTimeout(() => setSaved(false), 3000);
     } catch (err: any) {
       setError(err.message || "Something went wrong. Please try again.");
     } finally {
       setSaving(false);
+    }
+  };
+
+  const handleChangePassword = async () => {
+    setPasswordError("");
+    setPasswordSaved(false);
+
+    if (newPassword !== confirmPassword) {
+      setPasswordError("New passwords do not match.");
+      return;
+    }
+
+    if (newPassword.length < 8) {
+      setPasswordError("New password must be at least 8 characters.");
+      return;
+    }
+
+    setSavingPassword(true);
+
+    try {
+      const res = await fetch(`${apiUrl}/users/${user?.id}/password`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          current_password: currentPassword,
+          new_password: newPassword,
+          new_password_confirmation: confirmPassword,
+        }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.message || "Failed to change password");
+      }
+
+      setPasswordSaved(true);
+      setCurrentPassword("");
+      setNewPassword("");
+      setConfirmPassword("");
+      setTimeout(() => setPasswordSaved(false), 3000);
+    } catch (err: any) {
+      setPasswordError(err.message || "Current password is incorrect.");
+    } finally {
+      setSavingPassword(false);
     }
   };
 
@@ -146,7 +210,6 @@ export default function SettingsPage() {
       name !== (user?.name ?? "") ||
       email !== (user?.email ?? "") ||
       bio !== (user?.bio ?? "") ||
-      status !== (user?.status ?? "") ||
       role !== (user?.role ?? "innovator")
     );
   };
@@ -155,7 +218,6 @@ export default function SettingsPage() {
     setName(user?.name ?? "");
     setEmail(user?.email ?? "");
     setBio(user?.bio ?? "");
-    setStatus(user?.status ?? "");
     setRole(user?.role ?? "innovator");
   };
 
@@ -183,7 +245,7 @@ export default function SettingsPage() {
             </Link>
           </div>
 
-          {/* Profile section */}
+          {/* Profile Information Section */}
           <div className="settings-card">
             <div className="settings-card-title">Profile Information</div>
 
@@ -236,8 +298,8 @@ export default function SettingsPage() {
                   setRole(e.target.value as "innovator" | "investor")
                 }
               >
-                <option value="innovator">🚀 Innovator</option>
-                <option value="investor">💰 Investor</option>
+                <option value="innovator">Innovator</option>
+                <option value="investor">Investor</option>
               </select>
               <p className="settings-hint">
                 Your role determines how others see you on the platform.
@@ -255,27 +317,6 @@ export default function SettingsPage() {
               />
             </div>
 
-            <div className="settings-field">
-              <label className="settings-label">Status</label>
-              <select
-                className="settings-select"
-                value={status}
-                onChange={(e) => setStatus(e.target.value)}
-              >
-                <option value="">Select a status</option>
-                <option value="looking_for_investor">
-                  🔍 Looking for Investor
-                </option>
-                <option value="looking_to_collaborate">
-                  🤝 Looking to Collaborate
-                </option>
-                <option value="open_to_connect">🌐 Open to Connect</option>
-              </select>
-              <p className="settings-hint">
-                Let others know what you're currently looking for.
-              </p>
-            </div>
-
             {error && (
               <div className="settings-error-msg">
                 <X size={14} />
@@ -286,7 +327,7 @@ export default function SettingsPage() {
             {saved && (
               <div className="settings-success-msg">
                 <Check size={14} />
-                Changes saved successfully.
+                Profile updated successfully.
               </div>
             )}
 
@@ -308,7 +349,120 @@ export default function SettingsPage() {
             </div>
           </div>
 
-          {/* Danger zone */}
+          {/* Change Password Section */}
+          <div className="settings-card">
+            <div className="settings-card-title">
+              <Lock size={16} className="settings-card-icon" />
+              Change Password
+            </div>
+
+            <p className="settings-password-hint">
+              To change password, enter your current password. If you forgot
+              your password, please contact an admin.
+            </p>
+
+            {/* Current Password */}
+            <div className="settings-field">
+              <label className="settings-label">Current Password</label>
+              <div className="settings-password-wrapper">
+                <input
+                  className="settings-input"
+                  type={showCurrentPassword ? "text" : "password"}
+                  value={currentPassword}
+                  onChange={(e) => setCurrentPassword(e.target.value)}
+                  placeholder="Enter your current password"
+                />
+                <button
+                  type="button"
+                  className="password-toggle"
+                  onClick={() => setShowCurrentPassword(!showCurrentPassword)}
+                >
+                  {showCurrentPassword ? (
+                    <Eye size={18} />
+                  ) : (
+                    <EyeOff size={18} />
+                  )}
+                </button>
+              </div>
+            </div>
+
+            {/* New Password */}
+            <div className="settings-field">
+              <label className="settings-label">New Password</label>
+              <div className="settings-password-wrapper">
+                <input
+                  className="settings-input"
+                  type={showNewPassword ? "text" : "password"}
+                  value={newPassword}
+                  onChange={(e) => setNewPassword(e.target.value)}
+                  placeholder="Enter new password (min. 8 characters)"
+                />
+                <button
+                  type="button"
+                  className="password-toggle"
+                  onClick={() => setShowNewPassword(!showNewPassword)}
+                >
+                  {showNewPassword ? <Eye size={18} /> : <EyeOff size={18} />}
+                </button>
+              </div>
+            </div>
+
+            {/* Confirm Password */}
+            <div className="settings-field">
+              <label className="settings-label">Confirm New Password</label>
+              <div className="settings-password-wrapper">
+                <input
+                  className="settings-input"
+                  type={showConfirmPassword ? "text" : "password"}
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  placeholder="Confirm your new password"
+                />
+                <button
+                  type="button"
+                  className="password-toggle"
+                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                >
+                  {showConfirmPassword ? (
+                    <Eye size={18} />
+                  ) : (
+                    <EyeOff size={18} />
+                  )}
+                </button>
+              </div>
+            </div>
+
+            {passwordError && (
+              <div className="settings-error-msg">
+                <X size={14} />
+                {passwordError}
+              </div>
+            )}
+
+            {passwordSaved && (
+              <div className="settings-success-msg">
+                <Check size={14} />
+                Password changed successfully.
+              </div>
+            )}
+
+            <div className="settings-save-row">
+              <button
+                className="settings-btn-save"
+                onClick={handleChangePassword}
+                disabled={
+                  savingPassword ||
+                  !currentPassword ||
+                  !newPassword ||
+                  !confirmPassword
+                }
+              >
+                {savingPassword ? "Changing..." : "Change Password"}
+              </button>
+            </div>
+          </div>
+
+          {/* Danger Zone */}
           <div className="settings-card settings-danger-zone">
             <div className="settings-card-title settings-danger-title">
               Danger Zone

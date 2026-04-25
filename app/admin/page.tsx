@@ -66,6 +66,14 @@ function AdminNav() {
             <FileText size={16} />
             Posts
           </Link>
+          <Link
+  href="/admin/messages"
+  className="admin-nav-link"
+  onClick={() => setActiveTab("messages")}
+>
+  <Mail size={16} />
+  Messages
+</Link>
           <Link href="/feed" className="admin-nav-link">
             <Home size={16} />
             Back to Feed
@@ -111,18 +119,28 @@ function StatusCard({ label, count, color }: any) {
 }
 
 export default function AdminDashboard() {
-  const { user } = useContext(AuthContext);
+  const { user, loading: authLoading } = useContext(AuthContext);
   const { dashboardData, loading, fetchDashboard } = useContext(AdminContext);
   const router = useRouter();
 
   useEffect(() => {
-    // Check if user is admin
-    if (user && !user.is_admin) {
-      router.push("/feed");
+    // Only fetch dashboard after auth is done and user is admin
+    if (!authLoading && user?.is_admin) {
+      fetchDashboard();
     }
-    fetchDashboard();
-  }, [user]);
+  }, [authLoading, user]);
 
+  // Show loading while auth is being restored
+  if (authLoading) {
+    return (
+      <div className="admin-loading">
+        <div className="spinner"></div>
+        <p>Loading...</p>
+      </div>
+    );
+  }
+
+  // After loading is done, check if user is admin
   if (!user || !user.is_admin) {
     return (
       <ProtectedRoute>
@@ -153,7 +171,7 @@ export default function AdminDashboard() {
         <div className="admin-container">
           <div className="admin-header">
             <h1 className="admin-title">Dashboard Overview</h1>
-            <p className="admin-subtitle">Welcome back, {user.name}</p>
+            <p className="admin-subtitle">Hello! {user.name}</p>
           </div>
 
           {/* Stats Cards */}
@@ -162,46 +180,46 @@ export default function AdminDashboard() {
               title="Total Users"
               value={dashboardData?.total_users}
               icon={<Users size={24} />}
-              color="#3b82f6"
+              color="#62656a"
             />
             <StatCard
               title="Total Posts"
               value={dashboardData?.total_posts}
               icon={<FileText size={24} />}
-              color="#10b981"
+              color="#3d554d"
             />
             <StatCard
               title="Total Comments"
               value={dashboardData?.total_comments}
               icon={<MessageCircle size={24} />}
-              color="#f59e0b"
+              color="#ceb17e"
             />
             <StatCard
               title="Total Messages"
               value={dashboardData?.total_messages}
               icon={<Mail size={24} />}
-              color="#8b5cf6"
+              color="#ae9bdb"
             />
           </div>
 
           {/* Posts by Category */}
           <div className="admin-card">
-            <h2 className="card-title">📊 Posts by Category</h2>
+            <h2 className="card-title">Posts by Category</h2>
             <div className="status-grid">
               <StatusCard
                 label="Sharing Idea"
                 count={dashboardData?.posts_by_status?.sharing_idea}
-                color="#f59e0b"
+                color="#efd09b"
               />
               <StatusCard
                 label="Open to Collaborate"
                 count={dashboardData?.posts_by_status?.open_to_collaborate}
-                color="#10b981"
+                color="#6ea593"
               />
-              <StatusCard
+                <StatusCard
                 label="Seeking Investment"
                 count={dashboardData?.posts_by_status?.seeking_investment}
-                color="#3b82f6"
+                color="#647a9e"
               />
             </div>
           </div>
@@ -210,7 +228,7 @@ export default function AdminDashboard() {
           <div className="two-col-grid">
             {/* Top Contributors */}
             <div className="admin-card">
-              <h2 className="card-title">🏆 Top Contributors</h2>
+              <h2 className="card-title">Top Contributors</h2>
               <div className="contributors-list">
                 <table className="admin-table">
                   <thead>
@@ -251,7 +269,7 @@ export default function AdminDashboard() {
 
             {/* Recent Users */}
             <div className="admin-card">
-              <h2 className="card-title">👤 Recent Users</h2>
+              <h2 className="card-title">Recent Users</h2>
               <div className="recent-list">
                 {dashboardData?.recent_users?.slice(0, 5).map((u: any) => (
                   <div key={u.id} className="recent-item">
@@ -274,7 +292,7 @@ export default function AdminDashboard() {
 
           {/* Recent Posts */}
           <div className="admin-card">
-            <h2 className="card-title">📝 Recent Posts</h2>
+            <h2 className="card-title">Recent Posts</h2>
             <div className="recent-posts-list">
               {dashboardData?.recent_posts?.slice(0, 5).map((post: any) => (
                 <div key={post.id} className="recent-post-item">

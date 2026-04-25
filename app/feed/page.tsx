@@ -69,23 +69,20 @@ export default function FeedPage() {
   };
 
   const filters = [
-    { id: "all", label: "All Posts", icon: "📰", count: getFilterCount(null) },
+    { id: "all", label: "All Posts", count: getFilterCount(null) },
     {
       id: "sharing_idea",
-      label: "Sharing Idea",
-      icon: "💡",
+      label: "Shared Ideas",
       count: getFilterCount("sharing_idea"),
     },
     {
       id: "open_to_collaborate",
-      label: "Open to Collaborate",
-      icon: "🤝",
+      label: "Collaborations",
       count: getFilterCount("open_to_collaborate"),
     },
     {
       id: "seeking_investment",
-      label: "Seeking Investment",
-      icon: "💰",
+      label: "Invest now",
       count: getFilterCount("seeking_investment"),
     },
   ];

@@ -58,9 +58,9 @@ export default function PostForm({ onSubmit, onClose, isInline }: Props) {
           onChange={(e) => setStatus(e.target.value)}
           className={styles.select}
         >
-          <option value="sharing_idea">💡 Sharing Idea</option>
-          <option value="open_to_collaborate">🤝 Open to Collaborate</option>
-          <option value="seeking_investment">💰 Seeking Investment</option>
+          <option value="sharing_idea">Sharing Idea</option>
+          <option value="open_to_collaborate">Open to Collaborate</option>
+          <option value="seeking_investment">Seeking Investment</option>
         </select>
         <button
           type="submit"

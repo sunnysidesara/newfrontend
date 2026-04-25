@@ -1,5 +1,5 @@
 /* =========================================================
-   VENTURA — globals.css  (single source of truth)
+   VENTURA — globals.css
    Landing · Auth · App Nav · Feed · Profile · Settings · Messages
    ========================================================= */
 @import "tailwindcss";
@@ -167,6 +167,46 @@ img {
   transform: translateY(-1px);
 }
 
+/* Password Input with Eye Icon */
+.password-input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.password-input {
+  width: 100%;
+  padding-right: 40px;
+}
+
+.password-toggle-btn {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #666666;
+  padding: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color 0.2s;
+}
+
+.password-toggle-btn:hover {
+  color: #111111;
+}
+
+.auth-forgot-password {
+  text-align: center;
+  font-size: 12px;
+  color: #666666;
+  margin-top: 16px;
+  padding-top: 12px;
+  border-top: 1px solid #e0e0e0;
+}
 /* =========================================================
    LANDING — HERO
    ========================================================= */
@@ -2473,6 +2513,21 @@ img {
 
 .header-options-btn:hover .header-options::after {
   width: 100%;
+}
+
+.auth-forgot-password {
+  text-align: center;
+  font-size: 12px;
+  color: #666666;
+  margin-top: 16px;
+  padding-top: 12px;
+  border-top: 1px solid #e0e0e0;
+}
+
+.auth-forgot-password .auth-link {
+  color: #111111;
+  font-weight: 600;
+  text-decoration: underline;
 }
 
 /* Creator Images */

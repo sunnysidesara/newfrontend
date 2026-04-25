@@ -21,7 +21,7 @@ interface Props {
   currentUserId: number;
   onUpdate: (
     id: number,
-    data: { title: string; body: string; status: string },
+    data: { title: string; body: string; status: string }
   ) => Promise<void>;
   onDelete: (id: number) => Promise<void>;
 }
@@ -41,7 +41,6 @@ export default function PostCard({
   const [showComments, setShowComments] = useState(false);
   const isOwner = post.user_id === currentUserId;
 
-  // Create message URL with user data as query params
   const messageUrl = `/messages?userId=${post.user_id}&userName=${encodeURIComponent(post.user?.name || "")}&userRole=${post.user?.role || ""}`;
 
   const save = async () => {
@@ -88,7 +87,6 @@ export default function PostCard({
             {post.user?.name?.[0]?.toUpperCase() ?? "?"}
           </div>
           <div className={styles.headInfo}>
-            {/* Author name as clickable link to profile */}
             <Link href={`/profile/${post.user_id}`} className={styles.author}>
               {post.user?.name ?? "Unknown"}
             </Link>
@@ -182,7 +180,6 @@ export default function PostCard({
           </Link>
         </footer>
 
-        {/* Comment Section */}
         {showComments && (
           <div className={styles.commentSectionWrapper}>
             <CommentSection post_id={post.id} />
@@ -190,7 +187,6 @@ export default function PostCard({
         )}
       </article>
 
-      {/* Delete Confirmation Modal */}
       {showDeleteConfirm && (
         <div className={styles.confirmOverlay} onClick={cancelDelete}>
           <div

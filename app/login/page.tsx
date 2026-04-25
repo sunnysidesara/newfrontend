@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useState, useContext } from "react";
 import { useRouter } from "next/navigation";
 import { AuthContext } from "@/context/AuthContext";
+import { Eye, EyeOff } from "lucide-react";
 
 export default function LoginPage() {
   const { login } = useContext(AuthContext);
@@ -12,6 +13,7 @@ export default function LoginPage() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -27,9 +29,12 @@ export default function LoginPage() {
     }
   };
 
+  const togglePasswordVisibility = () => {
+    setShowPassword(!showPassword);
+  };
+
   return (
     <main className="main">
-      {/* Header */}
       <header className="header">
         <div className="header-container">
           <div className="header-left">
@@ -74,29 +79,37 @@ export default function LoginPage() {
               <label className="form-label">Email address</label>
               <input
                 type="email"
-                placeholder="you@example.com"
+                placeholder="ex. carmona@example.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 className="form-input"
                 required
               />
             </div>
+            
             <div className="form-group">
               <label className="form-label">Password</label>
-              <input
-                type="password"
-                placeholder="Your password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="form-input"
-                required
-              />
+              <div className="password-input-wrapper">
+                <input
+                  type={showPassword ? "text" : "password"}
+                  placeholder="Your password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className="form-input password-input"
+                  required
+                />
+                <button
+                  type="button"
+                  onClick={togglePasswordVisibility}
+                  className="password-toggle-btn"
+                  tabIndex={-1}
+                >
+                  {showPassword ? <Eye size={18} /> : <EyeOff size={18} />}
+                </button>
+              </div>
             </div>
-            <button
-              type="submit"
-              className="auth-btn-primary"
-              disabled={loading}
-            >
+            
+            <button type="submit" className="auth-btn-primary" disabled={loading}>
               {loading ? "Signing in..." : "Log In"}
             </button>
           </form>
@@ -110,6 +123,10 @@ export default function LoginPage() {
             <Link href="/signup" className="auth-link">
               Sign up
             </Link>
+          </p>
+
+          <p className="auth-forgot-password">
+            Forgot your password? Please contact the admin.
           </p>
         </div>
       </div>

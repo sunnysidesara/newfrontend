@@ -11,11 +11,13 @@ interface User {
   bio: string | null;
   status: string | null;
   avatar_url: string | null;
+  is_admin?: boolean;
 }
 
 interface AuthContextType {
   user: User | null;
   token: string | null;
+  loading: boolean;
   login: (email: string, password: string) => Promise<void>;
   register: (data: {
     name: string;
@@ -34,10 +36,12 @@ export const AuthContext = createContext<AuthContextType>(
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [token, setToken] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const stored_token = localStorage.getItem("ventur_token");
     const stored_user = localStorage.getItem("ventur_user");
+    
     if (stored_token && stored_user) {
       // Verify token with backend
       fetch(`${API}/me`, {
@@ -60,7 +64,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           localStorage.removeItem("ventur_user");
           setToken(null);
           setUser(null);
+        })
+        .finally(() => {
+          setLoading(false);
         });
+    } else {
+      setLoading(false);
     }
   }, []);
 
@@ -113,7 +122,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   return (
-    <AuthContext.Provider value={{ user, token, login, register, logout }}>
+    <AuthContext.Provider value={{ user, token, loading, login, register, logout }}>
       {children}
     </AuthContext.Provider>
   );

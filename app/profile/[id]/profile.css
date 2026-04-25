@@ -265,34 +265,16 @@
 }
 
 .role-innovator {
-  background: #dcfce7;
-  color: #15803d;
+  background: #110135;
+  color: #ffffff;
 }
 
 .role-investor {
-  background: #dbeafe;
-  color: #1d4ed8;
+  background: #013d14;
+  color: #f0f1f4;
 }
 
-.profile-status-pill {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 5px 14px;
-  background: var(--accent);
-  border-radius: 30px;
-  font-size: 12px;
-  color: var(--muted);
-  margin-bottom: 16px;
-}
-
-.profile-status-dot {
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  background: #10b981;
-  box-shadow: 0 0 4px rgba(16, 185, 129, 0.5);
-}
+/* Status pill - REMOVED (no longer needed) */
 
 .profile-meta-row {
   display: flex;
@@ -363,19 +345,7 @@
   border-color: var(--dark);
 }
 
-.profile-select {
-  width: 100%;
-  padding: 12px 16px;
-  border: 1px solid var(--border);
-  border-radius: 12px;
-  font-size: 14px;
-  background: white;
-}
-
-.profile-select:focus {
-  outline: none;
-  border-color: var(--dark);
-}
+/* Status select - REMOVED */
 
 .profile-success-msg {
   display: flex;
@@ -396,7 +366,7 @@
 }
 
 .profile-btn-cancel {
-  padding: 8px 20px;
+  padding: 8px 24px;
   background: transparent;
   border: 1px solid var(--border);
   border-radius: 40px;
