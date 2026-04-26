@@ -655,6 +655,13 @@
   z-index: 1000;
 }
 
+/* Safari fallback - no blur */
+@supports (backdrop-filter: blur(4px)) {
+  .modal-overlay {
+    backdrop-filter: blur(4px);
+  }
+}
+
 .modal-container {
   background: #111111;
   border-radius: 20px;
@@ -701,7 +708,7 @@
   border: 1px solid #222222;
   border-radius: 12px;
   font-size: 14px;
-  color: white;
+  color: rgb(242, 241, 241);
 }
 
 .modal-body input:focus,
@@ -1312,7 +1319,7 @@
   align-items: center;
   gap: 6px;
   padding: 8px 20px;
-  background: #22c55e;
+  background: #01531f;
   border: none;
   border-radius: 30px;
   font-size: 12px;
@@ -1348,4 +1355,248 @@
 .edit-post-btn:hover {
   background: #3b82f6;
   color: white;
+}
+
+/* =========================================================
+   DELETE CONFIRMATION MODAL
+   ========================================================= */
+
+/* Modal Overlay */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.8);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+/* Modal Container */
+.modal-container {
+  background: #111111;
+  border-radius: 20px;
+  width: 90%;
+  max-width: 420px;
+  overflow: hidden;
+  border: 1px solid #222222;
+  box-shadow: 0 20px 35px -8px rgba(0, 0, 0, 0.5);
+}
+
+/* Modal Header */
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 24px;
+  border-bottom: 1px solid #222222;
+}
+
+.modal-header h3 {
+  font-size: 18px;
+  font-weight: 700;
+  color: white;
+  margin: 0;
+}
+
+.modal-header button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #888888;
+  transition: color 0.2s;
+  padding: 4px;
+}
+
+.modal-header button:hover {
+  color: white;
+}
+
+/* Modal Body */
+.modal-body {
+  padding: 24px;
+  text-align: center;
+}
+
+.modal-body p {
+  font-size: 15px;
+  color: #cccccc;
+  margin-bottom: 12px;
+  line-height: 1.5;
+}
+
+.modal-warning {
+  font-size: 13px;
+  color: #f59e0b;
+  background: rgba(245, 158, 11, 0.1);
+  padding: 10px 12px;
+  border-radius: 8px;
+  margin-top: 8px;
+}
+
+/* Modal Footer */
+.modal-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  padding: 16px 24px;
+  border-top: 1px solid #222222;
+}
+
+/* Cancel Button */
+.modal-cancel {
+  padding: 8px 20px;
+  background: transparent;
+  border: 1px solid #333333;
+  border-radius: 30px;
+  font-size: 13px;
+  font-weight: 500;
+  color: #888888;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.modal-cancel:hover {
+  background: #1a1a1a;
+  border-color: #444444;
+  color: white;
+}
+
+/* Delete Button */
+.modal-delete {
+  padding: 8px 20px;
+  background: #120202;
+  border: none;
+  border-radius: 30px;
+  font-size: 13px;
+  font-weight: 600;
+  color: white;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.modal-delete:hover {
+  background: #571111;
+  transform: translateY(-1px);
+}
+
+/* Delete Modal specific width */
+.delete-modal {
+  max-width: 420px;
+}
+
+/* Checkbox Row */
+.checkbox-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 0;
+}
+
+.checkbox-label-text {
+  font-size: 14px;
+  color: white;
+}
+
+/* Toggle Switch */
+.checkbox-switch {
+  position: relative;
+  display: inline-block;
+  width: 50px;
+  height: 24px;
+}
+
+.checkbox-switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.checkbox-slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #333333;
+  transition: 0.3s;
+  border-radius: 24px;
+}
+
+.checkbox-slider:before {
+  position: absolute;
+  content: "";
+  height: 18px;
+  width: 18px;
+  left: 3px;
+  bottom: 3px;
+  background-color: white;
+  transition: 0.3s;
+  border-radius: 50%;
+}
+
+.checkbox-switch input:checked + .checkbox-slider {
+  background-color: #10b981;
+}
+
+.checkbox-switch input:checked + .checkbox-slider:before {
+  transform: translateX(26px);
+}
+
+/* Password Input with Toggle */
+.password-input-wrapper {
+  position: relative;
+  width: 100%;
+}
+
+.password-input-wrapper input {
+  width: 100%;
+  padding: 12px;
+  padding-right: 42px;
+  background: #0a0a0a;
+  border: 1px solid #222222;
+  border-radius: 12px;
+  font-size: 14px;
+  color: white;
+  font-family: inherit;
+}
+
+.password-input-wrapper input:focus {
+  outline: none;
+  border-color: #444444;
+}
+
+.password-input-wrapper input:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.password-toggle {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  color: #888888;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  transition: color 0.2s;
+}
+
+.password-toggle:hover {
+  color: white;
+}
+
+.password-toggle:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }

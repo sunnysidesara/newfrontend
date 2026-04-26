@@ -16,6 +16,7 @@ import {
   Lock,
   Eye,
   EyeOff,
+  AlertTriangle,
 } from "lucide-react";
 import "./settings.css";
 
@@ -81,9 +82,14 @@ export default function SettingsPage() {
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-  const [showCurrentPassword, setShowCurrentPassword] = useState(false); // false = hidden
+  const [showCurrentPassword, setShowCurrentPassword] = useState(false);
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+
+  // Delete account modal
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [deleting, setDeleting] = useState(false);
+  const [deleteError, setDeleteError] = useState("");
 
   // UI states
   const [saving, setSaving] = useState(false);
@@ -196,6 +202,34 @@ export default function SettingsPage() {
       setPasswordError(err.message || "Current password is incorrect.");
     } finally {
       setSavingPassword(false);
+    }
+  };
+
+  const handleDeleteAccount = async () => {
+    setDeleting(true);
+    setDeleteError("");
+
+    try {
+      const res = await fetch(`${apiUrl}/users/${user?.id}`, {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.message || "Failed to delete account");
+      }
+
+      // Logout and redirect to signup page
+      await logout();
+      router.push("/signup");
+    } catch (err: any) {
+      setDeleteError(err.message);
+      setDeleting(false);
     }
   };
 
@@ -465,7 +499,7 @@ export default function SettingsPage() {
           {/* Danger Zone */}
           <div className="settings-card settings-danger-zone">
             <div className="settings-card-title settings-danger-title">
-              Danger Zone
+              Delete Account
             </div>
 
             <div className="settings-danger-row">
@@ -494,9 +528,7 @@ export default function SettingsPage() {
               </div>
               <button
                 className="settings-btn-danger"
-                onClick={() =>
-                  alert("Please contact support to delete your account.")
-                }
+                onClick={() => setShowDeleteModal(true)}
               >
                 Delete Account
               </button>
@@ -504,6 +536,53 @@ export default function SettingsPage() {
           </div>
         </div>
       </div>
+
+      {/* Delete Account Confirmation Modal */}
+      {showDeleteModal && (
+        <div
+          className="modal-overlay"
+          onClick={() => setShowDeleteModal(false)}
+        >
+          <div
+            className="modal-container delete-modal"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="modal-header">
+              <h3>Delete Account</h3>
+              <button onClick={() => setShowDeleteModal(false)}>
+                <X size={18} />
+              </button>
+            </div>
+            <div className="modal-body">
+              <div className="delete-warning-icon">
+                <AlertTriangle size={48} />
+              </div>
+              <p>Are you sure you want to delete your account?</p>
+              <p className="modal-warning">
+                This action is <strong>permanent and cannot be undone</strong>.
+                All your posts, comments, conversations will be permanently
+                deleted. You will lose access to your account!
+              </p>
+              {deleteError && <p className="delete-error">{deleteError}</p>}
+            </div>
+            <div className="modal-footer">
+              <button
+                className="modal-cancel"
+                onClick={() => setShowDeleteModal(false)}
+              >
+                Cancel
+              </button>
+              <button
+                className="modal-delete-account"
+                onClick={handleDeleteAccount}
+                disabled={deleting}
+              >
+                {deleting ? "Deleting..." : "Yes, Delete My Account"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </ProtectedRoute>
   );
 }

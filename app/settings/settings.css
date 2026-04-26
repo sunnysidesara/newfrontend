@@ -196,12 +196,20 @@
 }
 
 .settings-card-title {
+  display: flex;
+  align-items: center;
   font-size: 18px;
   font-weight: 700;
   color: var(--dark);
-  margin-bottom: 24px;
-  padding-bottom: 16px;
+  margin-bottom: 20px;
+  padding-bottom: 12px;
   border-bottom: 1px solid var(--border);
+}
+
+.settings-card-icon {
+  display: inline-block;
+  margin-right: 8px;
+  vertical-align: middle;
 }
 
 /* Avatar Row */
@@ -299,6 +307,44 @@
   margin-top: 6px;
 }
 
+/* Password field with eye toggle */
+.settings-password-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.settings-password-wrapper .settings-input {
+  flex: 1;
+  padding-right: 45px;
+}
+
+.password-toggle {
+  position: absolute;
+  right: 12px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--muted);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px;
+}
+
+.password-toggle:hover {
+  color: var(--dark);
+}
+
+.settings-password-hint {
+  font-size: 12px;
+  color: #888888;
+  margin-bottom: 20px;
+  padding: 10px 12px;
+  background: var(--accent);
+  border-radius: 12px;
+}
+
 /* Messages */
 .settings-success-msg,
 .settings-error-msg {
@@ -312,14 +358,14 @@
 }
 
 .settings-success-msg {
-  background: #ecfdf5;
-  color: #065f46;
-  border: 1px solid #a7f3d0;
+  background: #dcfce7;
+  color: #15803d;
+  border: 1px solid #bbf7d0;
 }
 
 .settings-error-msg {
   background: #fef2f2;
-  color: #991b1b;
+  color: #b91c1c;
   border: 1px solid #fecaca;
 }
 
@@ -379,13 +425,13 @@
 
 /* Danger Zone */
 .settings-danger-zone {
-  border-color: #200606;
-  background: #fef2f2;
+  border-color: #390606;
+  background: #f7f6f6;
 }
 
 .settings-danger-title {
-  color: #010000;
-  border-bottom-color: #8d7878;
+  color: #710707;
+  border-bottom-color: #1c0808;
 }
 
 .settings-danger-row {
@@ -393,7 +439,7 @@
   justify-content: space-between;
   align-items: center;
   padding: 16px 0;
-  border-bottom: 1px solid #b39898;
+  border-bottom: 1px solid #371010;
 }
 
 .settings-danger-row:last-child {
@@ -404,7 +450,7 @@
 .settings-danger-label {
   font-size: 14px;
   font-weight: 600;
-  color: #280707;
+  color: #5b0909;
   margin-bottom: 4px;
 }
 
@@ -414,13 +460,13 @@
 }
 
 .settings-btn-danger {
-  padding: 8px 20px;
+  padding: 8px 30px;
   background: transparent;
   border: 1px solid #fecaca;
   border-radius: 40px;
   font-size: 13px;
   font-weight: 500;
-  color: #991b1b;
+  color: #b91c1c;
   cursor: pointer;
   transition: all 0.2s;
 }
@@ -495,56 +541,154 @@
   }
 }
 
-/* Password field with eye toggle */
-.settings-password-wrapper {
-  position: relative;
-  display: flex;
-  align-items: center;
-}
+/* =========================================================
+   DELETE ACCOUNT MODAL
+   ========================================================= */
+/* =========================================================
+   DELETE ACCOUNT MODAL - FIXED PADDING & LAYOUT
+   ========================================================= */
 
-.settings-password-wrapper .settings-input {
-  flex: 1;
-  padding-right: 45px;
-}
-
-.password-toggle {
-  position: absolute;
-  right: 12px;
-  background: none;
-  border: none;
-  cursor: pointer;
-  color: var(--muted);
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.85);
+  backdrop-filter: blur(4px);
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 8px;
+  z-index: 1000;
 }
 
-.password-toggle:hover {
-  color: var(--dark);
+.modal-container.delete-modal {
+  background: #1a1a1a;
+  border-radius: 24px;
+  width: 90%;
+  max-width: 560px;
+  min-width: 400px;
+  overflow: hidden;
+  border: 1px solid #333;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
 }
 
-/* Card icon */
-.settings-card-icon {
-  display: inline-block;
-  margin-right: 8px;
-  vertical-align: middle;
-}
-
-.settings-card-title {
+.delete-modal .modal-header {
+  padding: 20px 24px;
+  border-bottom: 1px solid #333;
   display: flex;
+  justify-content: space-between;
   align-items: center;
-  font-size: 18px;
-  font-weight: 700;
-  color: var(--dark);
-  margin-bottom: 20px;
-  padding-bottom: 12px;
-  border-bottom: 1px solid var(--border);
 }
 
-.settings-password-hint {
-  font-size: 12px;
-  color: #888888;
-  margin-bottom: 20px;
+.delete-modal .modal-header h3 {
+  font-size: 20px;
+  font-weight: 700;
+  color: #fff;
+  margin: 0;
+}
+
+.delete-modal .modal-header button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #888;
+  padding: 10px;
+}
+
+.delete-modal .modal-body {
+  padding: 24px;
+  text-align: center;
+}
+
+.delete-modal .modal-body p {
+  font-size: 15px;
+  color: #ddd;
+  margin-bottom: 16px;
+  line-height: 1.5;
+}
+
+.delete-warning-icon {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 16px;
+  color: #ef4444;
+}
+
+.delete-modal .modal-warning {
+  font-size: 13px;
+  color: #f59e0b;
+  background: rgba(245, 158, 11, 0.1);
   padding: 10px 12px;
+  border-radius: 10px;
+  margin: 16px 0;
+}
+
+.delete-consequences {
+  text-align: left;
+  margin: 20px 0 0 0;
+  padding: 16px 20px;
+  background: #0f0f0f;
+  border-radius: 12px;
+  color: #aaa;
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.delete-consequences li {
+  margin: 6px 0;
+  margin-left: 20px;
+}
+
+.delete-error {
+  color: #ef4444;
+  font-size: 13px;
+  margin-top: 16px;
+  padding: 10px;
+  background: rgba(239, 68, 68, 0.1);
+  border-radius: 8px;
+}
+
+.delete-modal .modal-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  padding: 16px 24px;
+  border-top: 1px solid #333;
+}
+
+.delete-modal .modal-cancel {
+  padding: 10px 20px;
+  background: transparent;
+  border: 1px solid #444;
+  border-radius: 40px;
+  font-size: 14px;
+  font-weight: 500;
+  color: #aaa;
+  cursor: pointer;
+}
+
+.delete-modal .modal-cancel:hover {
+  background: #2a2a2a;
+  color: #fff;
+}
+
+.delete-modal .modal-delete-account {
+  padding: 10px 20px;
+  background: #dc2626;
+  border: none;
+  border-radius: 40px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #fff;
+  cursor: pointer;
+}
+
+.delete-modal .modal-delete-account:hover {
+  background: #b91c1c;
+}
+
+.delete-modal .modal-delete-account:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
 }

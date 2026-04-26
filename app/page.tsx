@@ -6,7 +6,6 @@ import { useEffect, useRef } from "react";
 export default function Home() {
   const observerRef = useRef<IntersectionObserver | null>(null);
 
-  // Function to scroll to section
   const scrollToSection = (sectionId: string) => {
     const section = document.getElementById(sectionId);
     if (section) {
@@ -57,7 +56,7 @@ export default function Home() {
               onClick={() => scrollToSection("meet-creators")}
               className="header-options-btn"
             >
-              <h1 className="header-options">Contact</h1>
+              <h1 className="header-options">Creators</h1>
             </button>
           </div>
           <div className="header-right">
@@ -90,8 +89,7 @@ export default function Home() {
           />
           <h1 className="hero-title-text">VISION meets CAPITAL</h1>
           <p className="hero-subtitle">
-            The private bridge between world-class founders and the capital that
-            moves markets.
+            The shortest path from pitch to partnership.
           </p>
           <div className="hero-cta-group">
             <Link href="/signup" className="btn-cta-primary">
@@ -119,24 +117,28 @@ export default function Home() {
               <div className="step-number">01</div>
               <h3 className="step-title">Share Your Vision</h3>
               <p className="step-desc">
-                Create your project profile in minutes. Share your pitch deck,
-                traction, and funding needs.
+                Turn your idea into a story that investors can't ignore. In
+                minutes, you can create a compelling project profile that
+                showcases your pitch deck, traction, and funding needs. No
+                bluff. Just clarity.
               </p>
             </div>
             <div className="step-card reveal">
               <div className="step-number">02</div>
               <h3 className="step-title">Get Matched</h3>
               <p className="step-desc">
-                Our intelligent matching algorithm connects you with relevant
-                investors. No more cold emails.
+                Stop chasing cold emails. Our smart matching algorithm connects
+                you with investors who are already looking for someone exactly
+                like you. The right eyes on your idea, at the right time.
               </p>
             </div>
             <div className="step-card reveal">
               <div className="step-number">03</div>
               <h3 className="step-title">Close the Deal</h3>
               <p className="step-desc">
-                Move from introduction to term sheet with full support and bring
-                your vision to life.
+                From first hello to final signature, we've got your back. Move
+                seamlessly through conversations, due diligence, and term
+                sheets. You focus on building. We'll help you close.
               </p>
             </div>
           </div>
@@ -155,24 +157,27 @@ export default function Home() {
               <div className="step-number">01</div>
               <h3 className="step-title">Discover Opportunities</h3>
               <p className="step-desc">
-                Browse vetted, investment-ready projects across AI, CleanTech,
-                FinTech, HealthTech, and more.
+                Every opportunity is pre-screened for quality, traction, and
+                founder readiness. You see only what matters. You invest only
+                where it counts.
               </p>
             </div>
             <div className="step-card reveal">
               <div className="step-number">02</div>
               <h3 className="step-title">Connect Directly</h3>
               <p className="step-desc">
-                Talk directly with founders, review due diligence materials, and
-                negotiate terms.
+                Skip the gatekeepers. Talk directly with founders, review due
+                diligence materials, and negotiate terms on your schedule. Real
+                conversations. Real deal flow. Real fast.
               </p>
             </div>
             <div className="step-card reveal">
               <div className="step-number">03</div>
               <h3 className="step-title">Build Your Portfolio</h3>
               <p className="step-desc">
-                Co-invest with trusted partners and build a diverse portfolio of
-                high-potential startups.
+                Don't go it alone. Co‑invest with trusted partners and build a
+                diverse portfolio of high‑potential startups. Smart money moves
+                faster when you move together.
               </p>
             </div>
           </div>
@@ -185,7 +190,7 @@ export default function Home() {
           <p className="section-eyebrow reveal">The Team</p>
           <h2 className="section-heading reveal">Meet the Creators</h2>
           <p className="section-subheading reveal">
-            The visionary team building the future of private capital markets
+            We believe the best ideas deserve the fastest path to capital.
           </p>
 
           <div className="creators-grid">

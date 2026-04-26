@@ -12,6 +12,7 @@ import PostCard from "@/components/PostCard";
 import PostForm from "@/components/PostForm";
 import { PostContext } from "@/context/PostContext";
 import { AuthContext } from "@/context/AuthContext";
+import { MessageContext } from "@/context/MessageContext"; // ← ADD THIS
 import Link from "next/link";
 import styles from "./feed.module.css";
 
@@ -19,6 +20,7 @@ export default function FeedPage() {
   const { posts, loading, fetchPosts, createPost, updatePost, deletePost } =
     useContext(PostContext);
   const { user } = useContext(AuthContext);
+  const { unreadCount } = useContext(MessageContext); // ← ADD THIS
   const [showPostForm, setShowPostForm] = useState(false);
   const [showMobileModal, setShowMobileModal] = useState(false);
   const [activeFilter, setActiveFilter] = useState<string>("all");
@@ -103,6 +105,10 @@ export default function FeedPage() {
             <Link href="/messages" className={styles.navLink}>
               <MessageSquare size={18} />
               <span>Messages</span>
+              {/* UNREAD BADGE - RED DOT WITH NUMBER */}
+              {unreadCount > 0 && (
+                <span className={styles.unreadBadge}>{unreadCount}</span>
+              )}
             </Link>
             <Link href="/settings" className={styles.navLink}>
               <Settings size={18} />
@@ -167,7 +173,6 @@ export default function FeedPage() {
                 }`}
                 onClick={() => setActiveFilter(filter.id)}
               >
-                <span className={styles.filterIcon}>{filter.icon}</span>
                 <span className={styles.filterLabel}>{filter.label}</span>
                 <span className={styles.filterCount}>{filter.count}</span>
               </button>

@@ -19,7 +19,9 @@ import {
   LogOut,
   LayoutDashboard,
   Key,
-  Mail
+  Mail,
+  Eye,
+  EyeOff,
 } from "lucide-react";
 import "../admin.css";
 
@@ -60,14 +62,14 @@ function AdminNav() {
             <FileText size={16} />
             Posts
           </Link>
-           <Link
-  href="/admin/messages"
-  className="admin-nav-link"
-  onClick={() => setActiveTab("messages")}
->
-  <Mail size={16} />
-  Messages
-</Link>
+          <Link
+            href="/admin/messages"
+            className="admin-nav-link"
+            onClick={() => setActiveTab("messages")}
+          >
+            <Mail size={16} />
+            Messages
+          </Link>
           <Link href="/feed" className="admin-nav-link">
             <Home size={16} />
             Back to Feed
@@ -123,9 +125,14 @@ export default function AdminUsers() {
     is_admin: false,
   });
   const [submitting, setSubmitting] = useState(false);
+
+  // Password visibility states
+  const [showCreatePassword, setShowCreatePassword] = useState(false);
+  const [showEditPassword, setShowEditPassword] = useState(false);
+  const [showEditConfirmPassword, setShowEditConfirmPassword] = useState(false);
+
   const router = useRouter();
 
-  // Wait for auth to finish loading
   useEffect(() => {
     if (!authLoading && user?.is_admin) {
       loadUsers();
@@ -159,6 +166,7 @@ export default function AdminUsers() {
         role: "innovator",
         is_admin: false,
       });
+      setShowCreatePassword(false);
       loadUsers();
     } catch (error) {
       console.error("Error creating user:", error);
@@ -192,6 +200,8 @@ export default function AdminUsers() {
     setEditPassword("");
     setEditConfirmPassword("");
     setEditError("");
+    setShowEditPassword(false);
+    setShowEditConfirmPassword(false);
   };
 
   const handleUpdateUser = async () => {
@@ -216,7 +226,6 @@ export default function AdminUsers() {
     setUpdating(false);
   };
 
-  // Show loading while auth is being restored
   if (authLoading) {
     return (
       <div className="admin-loading">
@@ -226,7 +235,6 @@ export default function AdminUsers() {
     );
   }
 
-  // After loading is done, check if user is admin
   if (!user || !user.is_admin) {
     return (
       <ProtectedRoute>
@@ -329,7 +337,7 @@ export default function AdminUsers() {
           </div>
         </div>
 
-        {/* Create User Modal */}
+        {/* Create User Modal with Password Toggle */}
         {showCreateModal && (
           <div
             className="modal-overlay"
@@ -365,15 +373,30 @@ export default function AdminUsers() {
                     }
                     required
                   />
-                  <input
-                    type="password"
-                    placeholder="Password"
-                    value={formData.password}
-                    onChange={(e) =>
-                      setFormData({ ...formData, password: e.target.value })
-                    }
-                    required
-                  />
+                  <div className="password-input-wrapper">
+                    <input
+                      type={showCreatePassword ? "text" : "password"}
+                      placeholder="Password"
+                      value={formData.password}
+                      onChange={(e) =>
+                        setFormData({ ...formData, password: e.target.value })
+                      }
+                      required
+                      autoComplete="new-password"
+                    />
+                    <button
+                      type="button"
+                      className="password-toggle"
+                      onClick={() => setShowCreatePassword(!showCreatePassword)}
+                      tabIndex={-1}
+                    >
+                      {showCreatePassword ? (
+                        <Eye size={18} />
+                      ) : (
+                        <EyeOff size={18} />
+                      )}
+                    </button>
+                  </div>
                   <select
                     value={formData.role}
                     onChange={(e) =>
@@ -486,7 +509,7 @@ export default function AdminUsers() {
           </div>
         )}
 
-        {/* Edit User Modal (Email + Password) */}
+        {/* Edit User Modal with Password Toggles */}
         {showEditModal && (
           <div className="modal-overlay" onClick={() => setShowEditModal(null)}>
             <div
@@ -507,19 +530,51 @@ export default function AdminUsers() {
                   onChange={(e) => setEditEmail(e.target.value)}
                   required
                 />
-                <input
-                  type="password"
-                  placeholder="New Password (leave blank to keep current)"
-                  value={editPassword}
-                  onChange={(e) => setEditPassword(e.target.value)}
-                />
-                <input
-                  type="password"
-                  placeholder="Confirm New Password"
-                  value={editConfirmPassword}
-                  onChange={(e) => setEditConfirmPassword(e.target.value)}
-                  disabled={!editPassword}
-                />
+                <div className="password-input-wrapper">
+                  <input
+                    type={showEditPassword ? "text" : "password"}
+                    placeholder="New Password (leave blank to keep current)"
+                    value={editPassword}
+                    onChange={(e) => setEditPassword(e.target.value)}
+                    autoComplete="new-password"
+                  />
+                  <button
+                    type="button"
+                    className="password-toggle"
+                    onClick={() => setShowEditPassword(!showEditPassword)}
+                    tabIndex={-1}
+                  >
+                    {showEditPassword ? (
+                      <Eye size={18} />
+                    ) : (
+                      <EyeOff size={18} />
+                    )}
+                  </button>
+                </div>
+                <div className="password-input-wrapper">
+                  <input
+                    type={showEditConfirmPassword ? "text" : "password"}
+                    placeholder="Confirm New Password"
+                    value={editConfirmPassword}
+                    onChange={(e) => setEditConfirmPassword(e.target.value)}
+                    disabled={!editPassword}
+                  />
+                  <button
+                    type="button"
+                    className="password-toggle"
+                    onClick={() =>
+                      setShowEditConfirmPassword(!showEditConfirmPassword)
+                    }
+                    tabIndex={-1}
+                    disabled={!editPassword}
+                  >
+                    {showEditConfirmPassword ? (
+                      <Eye size={18} />
+                    ) : (
+                      <EyeOff size={18} />
+                    )}
+                  </button>
+                </div>
                 {editError && <p className="password-error">{editError}</p>}
               </div>
               <div className="modal-footer">
@@ -561,7 +616,7 @@ export default function AdminUsers() {
                 <p>Are you sure you want to delete this user?</p>
                 <p className="modal-warning">
                   This action cannot be undone. All their posts and comments
-                  will be deleted.
+                  will be permanently deleted.
                 </p>
               </div>
               <div className="modal-footer">
@@ -575,7 +630,7 @@ export default function AdminUsers() {
                   className="modal-delete"
                   onClick={() => handleDeleteUser(showDeleteConfirm)}
                 >
-                  Delete
+                  Delete User
                 </button>
               </div>
             </div>

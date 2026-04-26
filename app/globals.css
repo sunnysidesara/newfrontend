@@ -313,12 +313,15 @@ img {
 }
 .btn-cta-primary {
   background: #111;
-  color: #fff;
+  color: #f7f3f3;
+  border: 2px solid #f7f7f7;
 }
 .btn-cta-primary:hover {
-  background: #333;
+  background: #f8f4f4;
   transform: translateY(-5px);
-  box-shadow: 0 16px 32px rgba(0, 0, 0, 0.18);
+  color: #100303;
+  border: 2px solid #000000;
+  box-shadow: 0 16px 32px rgba(244, 241, 241, 0.18);
 }
 .btn-cta-ghost {
   background: transparent;

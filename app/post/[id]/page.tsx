@@ -6,7 +6,6 @@ import Navbar from "@/components/Navbar";
 import CommentSection from "@/components/CommentSection";
 import StatusBadge from "@/components/StatusBadge";
 import ProtectedRoute from "@/components/ProtectedRoute";
-import "./profile.css";
 
 export default function PostDetailPage() {
   const { id } = useParams();

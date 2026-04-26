@@ -50,7 +50,7 @@ export default function LoginPage() {
               <h1 className="header-options">Platform</h1>
             </Link>
             <Link href="/#meet-creators" className="header-options-link">
-              <h1 className="header-options">Contact</h1>
+              <h1 className="header-options">Creators</h1>
             </Link>
           </div>
           <div className="header-right">
@@ -79,14 +79,14 @@ export default function LoginPage() {
               <label className="form-label">Email address</label>
               <input
                 type="email"
-                placeholder="ex. carmona@example.com"
+                placeholder="ex. carmona@ventura.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 className="form-input"
                 required
               />
             </div>
-            
+
             <div className="form-group">
               <label className="form-label">Password</label>
               <div className="password-input-wrapper">
@@ -108,8 +108,12 @@ export default function LoginPage() {
                 </button>
               </div>
             </div>
-            
-            <button type="submit" className="auth-btn-primary" disabled={loading}>
+
+            <button
+              type="submit"
+              className="auth-btn-primary"
+              disabled={loading}
+            >
               {loading ? "Signing in..." : "Log In"}
             </button>
           </form>
@@ -119,7 +123,7 @@ export default function LoginPage() {
           </div>
 
           <p className="auth-footer">
-            No account yet?{" "}
+            No account yet ?{" "}
             <Link href="/signup" className="auth-link">
               Sign up
             </Link>

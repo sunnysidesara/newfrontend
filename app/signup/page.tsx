@@ -100,7 +100,7 @@ export default function SignupPage() {
               <h1 className="header-options">Platform</h1>
             </Link>
             <Link href="/#meet-creators" className="header-options-link">
-              <h1 className="header-options">Contact</h1>
+              <h1 className="header-options">Creators</h1>
             </Link>
           </div>
           <div className="header-right">
@@ -142,7 +142,7 @@ export default function SignupPage() {
           </div>
 
           <form onSubmit={handleSubmit} className="auth-form">
-            <div className="form-options" style={{ marginBottom: 20 }}>
+            <div className="form-options form-options-spacing">
               <label className="checkbox-label">
                 <input type="checkbox" required /> I agree to the{" "}
                 <Link
@@ -179,7 +179,7 @@ export default function SignupPage() {
               <label className="form-label">Email address</label>
               <input
                 type="email"
-                placeholder="ex. carmona@example.com"
+                placeholder="ex. carmona@ventura.com"
                 value={email}
                 onChange={handleEmailChange}
                 className="form-input"

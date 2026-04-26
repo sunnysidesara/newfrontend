@@ -100,7 +100,6 @@ export default function AdminMessages() {
   );
   const router = useRouter();
 
-  // Wait for auth to finish loading
   useEffect(() => {
     if (!authLoading && user?.is_admin) {
       loadMessages();
@@ -120,7 +119,6 @@ export default function AdminMessages() {
     loadMessages();
   };
 
-  // Show loading while auth is being restored
   if (authLoading) {
     return (
       <div className="admin-loading">
@@ -130,7 +128,6 @@ export default function AdminMessages() {
     );
   }
 
-  // After loading is done, check if user is admin
   if (!user || !user.is_admin) {
     return (
       <ProtectedRoute>
@@ -173,7 +170,7 @@ export default function AdminMessages() {
                           <span className="admin-message-name">
                             {msg.sender?.name}
                           </span>
-                          <span className="admin-message-label">to</span>
+                          <span className="admin-message-label">→</span>
                           <span className="admin-message-name">
                             {msg.receiver?.name}
                           </span>
@@ -189,7 +186,7 @@ export default function AdminMessages() {
                           onClick={() => setShowDeleteConfirm(msg.id)}
                           title="Delete message"
                         >
-                          <Trash2 size={16} /> Delete
+                          <Trash2 size={16} /> Delete Message
                         </button>
                       </div>
                     </div>
@@ -203,7 +200,7 @@ export default function AdminMessages() {
           </div>
         </div>
 
-        {/* Delete Confirmation Modal */}
+        {/* Delete Confirmation Modal with clear message */}
         {showDeleteConfirm !== null && (
           <div
             className="modal-overlay"
