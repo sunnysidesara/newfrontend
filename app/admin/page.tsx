@@ -5,23 +5,16 @@ import { AuthContext } from "@/context/AuthContext";
 import { AdminContext } from "@/context/AdminContext";
 import Link from "next/link";
 import ProtectedRoute from "@/components/ProtectedRoute";
+import Loader from "@/components/Loader";
 import {
   Home,
-  MessageSquare,
-  Settings,
-  User,
   Users,
   FileText,
   MessageCircle,
   Mail,
-  TrendingUp,
-  Trash2,
-  Edit,
-  PlusCircle,
-  X,
   LogOut,
   LayoutDashboard,
-  List,
+  Handshake,
 } from "lucide-react";
 import "./admin.css";
 
@@ -67,29 +60,29 @@ function AdminNav() {
             Posts
           </Link>
           <Link
-  href="/admin/messages"
-  className="admin-nav-link"
-  onClick={() => setActiveTab("messages")}
->
-  <Mail size={16} />
-  Messages
-</Link>
+            href="/admin/messages"
+            className={`admin-nav-link ${activeTab === "messages" ? "active" : ""}`}
+            onClick={() => setActiveTab("messages")}
+          >
+            <Mail size={16} />
+            Messages
+          </Link>
+          <Link
+            href="/admin/partnerships"
+            className={`admin-nav-link ${activeTab === "partnerships" ? "active" : ""}`}
+            onClick={() => setActiveTab("partnerships")}
+          >
+            <Handshake size={16} />
+            Partnerships
+          </Link>
           <Link href="/feed" className="admin-nav-link">
             <Home size={16} />
             Back to Feed
           </Link>
         </div>
-        <div className="admin-nav-right">
-          <div className="admin-user-info">
-            <span className="admin-user-name">{user?.name}</span>
-            <span className={`admin-user-role ${user?.role}`}>
-              {user?.role}
-            </span>
-          </div>
-          <button onClick={handleLogout} className="admin-logout-btn">
-            <LogOut size={16} /> Logout
-          </button>
-        </div>
+        <button onClick={handleLogout} className="admin-logout-btn">
+          <LogOut size={16} /> Logout
+        </button>
       </div>
     </header>
   );
@@ -121,21 +114,28 @@ function StatusCard({ label, count, color }: any) {
 export default function AdminDashboard() {
   const { user, loading: authLoading } = useContext(AuthContext);
   const { dashboardData, loading, fetchDashboard } = useContext(AdminContext);
-  const router = useRouter();
+  const [initialLoad, setInitialLoad] = useState(true);
 
   useEffect(() => {
     // Only fetch dashboard after auth is done and user is admin
     if (!authLoading && user?.is_admin) {
-      fetchDashboard();
+      fetchDashboard().finally(() => {
+        setInitialLoad(false);
+      });
+    } else if (!authLoading && (!user || !user.is_admin)) {
+      // If user is not admin, stop loading
+      setInitialLoad(false);
     }
-  }, [authLoading, user]);
+  }, [authLoading, user, fetchDashboard]);
 
-  // Show loading while auth is being restored
-  if (authLoading) {
+  // Show loading during initial load OR while auth is loading OR while dashboard is loading
+  const isLoading = initialLoad || authLoading || loading;
+
+  // Show loading while authenticating or fetching data
+  if (isLoading) {
     return (
-      <div className="admin-loading">
-        <div className="spinner"></div>
-        <p>Loading...</p>
+      <div className="admin-loading-black">
+        <Loader fullPage text="Loading admin..." />
       </div>
     );
   }
@@ -152,15 +152,6 @@ export default function AdminDashboard() {
           </div>
         </div>
       </ProtectedRoute>
-    );
-  }
-
-  if (loading) {
-    return (
-      <div className="admin-loading">
-        <div className="spinner"></div>
-        <p>Loading dashboard...</p>
-      </div>
     );
   }
 
@@ -216,7 +207,7 @@ export default function AdminDashboard() {
                 count={dashboardData?.posts_by_status?.open_to_collaborate}
                 color="#6ea593"
               />
-                <StatusCard
+              <StatusCard
                 label="Seeking Investment"
                 count={dashboardData?.posts_by_status?.seeking_investment}
                 color="#647a9e"

@@ -2,10 +2,11 @@
 import { useState, useContext, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { AuthContext } from "@/context/AuthContext";
+import { MessageContext } from "@/context/MessageContext";
+import { PartnershipContext } from "@/context/PartnershipContext";
 import Link from "next/link";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import {
-  Bell,
   Home,
   MessageSquare,
   Settings,
@@ -17,12 +18,19 @@ import {
   Eye,
   EyeOff,
   AlertTriangle,
+  Users,
+  Key,
 } from "lucide-react";
 import "./settings.css";
 
 function AppNav() {
   const { user } = useContext(AuthContext);
+  const { unreadCount } = useContext(MessageContext);
+  const { pendingRequests } = useContext(PartnershipContext);
   const router = useRouter();
+
+  const totalPendingRequests = pendingRequests.length;
+
   return (
     <header className="settings-nav">
       <div className="settings-nav-inner">
@@ -34,9 +42,19 @@ function AppNav() {
             <Home size={18} />
             <span>Feed</span>
           </Link>
+          <Link href="/partners" className="settings-nav-link partners-link">
+            <Users size={18} />
+            <span>Partners</span>
+            {totalPendingRequests > 0 && (
+              <span className="nav-request-badge">{totalPendingRequests}</span>
+            )}
+          </Link>
           <Link href="/messages" className="settings-nav-link">
             <MessageSquare size={18} />
             <span>Messages</span>
+            {unreadCount > 0 && (
+              <span className="settings-unread-badge">{unreadCount}</span>
+            )}
           </Link>
           <Link href="/settings" className="settings-nav-link active">
             <Settings size={18} />
@@ -78,7 +96,7 @@ export default function SettingsPage() {
   const [bio, setBio] = useState(user?.bio ?? "");
   const [role, setRole] = useState(user?.role ?? "innovator");
 
-  // Password fields - default to HIDDEN (false)
+  // Password fields
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -86,8 +104,10 @@ export default function SettingsPage() {
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
-  // Delete account modal
+  // Delete account modal with password verification
   const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [deletePassword, setDeletePassword] = useState("");
+  const [showDeletePassword, setShowDeletePassword] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [deleteError, setDeleteError] = useState("");
 
@@ -206,11 +226,38 @@ export default function SettingsPage() {
   };
 
   const handleDeleteAccount = async () => {
+    if (!deletePassword) {
+      setDeleteError("Please enter your password to delete your account.");
+      return;
+    }
+
     setDeleting(true);
     setDeleteError("");
 
     try {
-      const res = await fetch(`${apiUrl}/users/${user?.id}`, {
+      // First, verify the password
+      const verifyRes = await fetch(`${apiUrl}/verify-password`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          password: deletePassword,
+        }),
+      });
+
+      if (!verifyRes.ok) {
+        const errorData = await verifyRes.json();
+        setDeleteError(
+          errorData.message || "Incorrect password. Please try again.",
+        );
+        setDeleting(false);
+        return;
+      }
+
+      // Password verified, proceed with deletion
+      const deleteRes = await fetch(`${apiUrl}/users/${user?.id}`, {
         method: "DELETE",
         headers: {
           "Content-Type": "application/json",
@@ -218,25 +265,54 @@ export default function SettingsPage() {
         },
       });
 
-      const data = await res.json();
+      const data = await deleteRes.json();
 
-      if (!res.ok) {
-        throw new Error(data.message || "Failed to delete account");
+      if (!deleteRes.ok) {
+        // Check for specific admin error messages
+        if (data.message && data.message.includes("only admin")) {
+          setDeleteError(
+            "Cannot delete account: You are the only admin. Please assign another admin first before deleting your account.",
+          );
+        } else if (data.message && data.message.includes("admin")) {
+          setDeleteError(
+            "Admin accounts cannot be deleted. Please contact another admin to remove your admin privileges first.",
+          );
+        } else {
+          setDeleteError(data.message || "Failed to delete account");
+        }
+        setDeleting(false);
+        return;
       }
 
-      // Logout and redirect to signup page
-      await logout();
-      router.push("/signup");
+      // Clear all local storage
+      localStorage.removeItem("ventur_token");
+      localStorage.removeItem("ventur_user");
+
+      // Close the modal
+      setShowDeleteModal(false);
+
+      // Force a hard navigation to signup page to reset all contexts
+      window.location.href = "/signup";
     } catch (err: any) {
-      setDeleteError(err.message);
+      console.error("Delete account error:", err);
+      setDeleteError(
+        err.message || "Failed to delete account. Please try again.",
+      );
       setDeleting(false);
     }
   };
 
   const handleLogout = async () => {
     setIsLoggingOut(true);
-    await logout();
-    router.push("/login");
+    try {
+      await logout();
+      localStorage.removeItem("ventur_token");
+      localStorage.removeItem("ventur_user");
+      window.location.href = "/login";
+    } catch (err) {
+      console.error("Logout error:", err);
+      window.location.href = "/login";
+    }
   };
 
   const hasChanges = () => {
@@ -253,6 +329,12 @@ export default function SettingsPage() {
     setEmail(user?.email ?? "");
     setBio(user?.bio ?? "");
     setRole(user?.role ?? "innovator");
+  };
+
+  const openDeleteModal = () => {
+    setDeletePassword("");
+    setDeleteError("");
+    setShowDeleteModal(true);
   };
 
   if (!user) return null;
@@ -395,7 +477,6 @@ export default function SettingsPage() {
               your password, please contact an admin.
             </p>
 
-            {/* Current Password */}
             <div className="settings-field">
               <label className="settings-label">Current Password</label>
               <div className="settings-password-wrapper">
@@ -420,7 +501,6 @@ export default function SettingsPage() {
               </div>
             </div>
 
-            {/* New Password */}
             <div className="settings-field">
               <label className="settings-label">New Password</label>
               <div className="settings-password-wrapper">
@@ -441,7 +521,6 @@ export default function SettingsPage() {
               </div>
             </div>
 
-            {/* Confirm Password */}
             <div className="settings-field">
               <label className="settings-label">Confirm New Password</label>
               <div className="settings-password-wrapper">
@@ -499,7 +578,7 @@ export default function SettingsPage() {
           {/* Danger Zone */}
           <div className="settings-card settings-danger-zone">
             <div className="settings-card-title settings-danger-title">
-              Delete Account
+              Danger Zone
             </div>
 
             <div className="settings-danger-row">
@@ -526,10 +605,7 @@ export default function SettingsPage() {
                   cannot be undone.
                 </div>
               </div>
-              <button
-                className="settings-btn-danger"
-                onClick={() => setShowDeleteModal(true)}
-              >
+              <button className="settings-btn-danger" onClick={openDeleteModal}>
                 Delete Account
               </button>
             </div>
@@ -537,7 +613,7 @@ export default function SettingsPage() {
         </div>
       </div>
 
-      {/* Delete Account Confirmation Modal */}
+      {/* Delete Account Confirmation Modal with Password Input */}
       {showDeleteModal && (
         <div
           className="modal-overlay"
@@ -563,6 +639,39 @@ export default function SettingsPage() {
                 All your posts, comments, conversations will be permanently
                 deleted. You will lose access to your account!
               </p>
+
+              {/* Password Input Section */}
+              <div className="delete-password-section">
+                <label className="delete-password-label">
+                  <Key size={16} />
+                  Enter your password to confirm:
+                </label>
+                <div className="delete-password-wrapper">
+                  <input
+                    type={showDeletePassword ? "text" : "password"}
+                    className="delete-password-input"
+                    placeholder="Your account password"
+                    value={deletePassword}
+                    onChange={(e) => setDeletePassword(e.target.value)}
+                    autoFocus
+                  />
+                  <button
+                    type="button"
+                    className="delete-password-toggle"
+                    onClick={() => setShowDeletePassword(!showDeletePassword)}
+                  >
+                    {showDeletePassword ? (
+                      <Eye size={18} />
+                    ) : (
+                      <EyeOff size={18} />
+                    )}
+                  </button>
+                </div>
+                <p className="delete-password-hint">
+                  Forgot your password? Please contact an admin.
+                </p>
+              </div>
+
               {deleteError && <p className="delete-error">{deleteError}</p>}
             </div>
             <div className="modal-footer">

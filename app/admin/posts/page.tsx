@@ -5,6 +5,7 @@ import { AuthContext } from "@/context/AuthContext";
 import { AdminContext } from "@/context/AdminContext";
 import Link from "next/link";
 import ProtectedRoute from "@/components/ProtectedRoute";
+import Loader from "@/components/Loader";
 import {
   Home,
   Users,
@@ -19,6 +20,7 @@ import {
   ChevronUp,
   Edit,
   Check,
+  Handshake,
 } from "lucide-react";
 import "../admin.css";
 
@@ -64,6 +66,14 @@ function AdminNav() {
             Posts
           </Link>
           <Link
+            href="/admin/partnerships"
+            className={`admin-nav-link ${activeTab === "partnerships" ? "active" : ""}`}
+            onClick={() => setActiveTab("partnerships")}
+          >
+            <Handshake size={16} />
+            Partnerships
+          </Link>
+          <Link
             href="/admin/messages"
             className="admin-nav-link"
             onClick={() => setActiveTab("messages")}
@@ -76,17 +86,9 @@ function AdminNav() {
             Back to Feed
           </Link>
         </div>
-        <div className="admin-nav-right">
-          <div className="admin-user-info">
-            <span className="admin-user-name">{user?.name}</span>
-            <span className={`admin-user-role ${user?.role}`}>
-              {user?.role}
-            </span>
-          </div>
-          <button onClick={handleLogout} className="admin-logout-btn">
-            <LogOut size={16} /> Logout
-          </button>
-        </div>
+        <button onClick={handleLogout} className="admin-logout-btn">
+          <LogOut size={16} /> Logout
+        </button>
       </div>
     </header>
   );
@@ -94,8 +96,13 @@ function AdminNav() {
 
 export default function AdminPosts() {
   const { user, loading: authLoading } = useContext(AuthContext);
-  const { fetchAllPosts, deletePost, updatePost, fetchAllComments, deleteComment } =
-    useContext(AdminContext);
+  const {
+    fetchAllPosts,
+    deletePost,
+    updatePost,
+    fetchAllComments,
+    deleteComment,
+  } = useContext(AdminContext);
   const [posts, setPosts] = useState<any[]>([]);
   const [comments, setComments] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -180,9 +187,8 @@ export default function AdminPosts() {
   // Show loading while auth is being restored
   if (authLoading) {
     return (
-      <div className="admin-loading">
-        <div className="spinner"></div>
-        <p>Loading...</p>
+      <div className="admin-loading-black">
+        <Loader fullPage text="Authenticating..." />
       </div>
     );
   }
@@ -216,7 +222,12 @@ export default function AdminPosts() {
 
           <div className="admin-card">
             {loading ? (
-              <div className="loading-spinner">Loading posts...</div>
+              <div
+                className="admin-loading-black"
+                style={{ minHeight: "300px", position: "relative" }}
+              >
+                <Loader text="Loading posts..." />
+              </div>
             ) : posts.length === 0 ? (
               <div className="empty-state">No posts yet</div>
             ) : (
@@ -259,7 +270,9 @@ export default function AdminPosts() {
                               <button
                                 className="expand-comments-btn"
                                 onClick={() => toggleExpand(post.id)}
-                                title={isExpanded ? "Hide comments" : "Show comments"}
+                                title={
+                                  isExpanded ? "Hide comments" : "Show comments"
+                                }
                               >
                                 <MessageCircle size={14} />
                                 <span>{postComments.length} comments</span>
@@ -281,7 +294,10 @@ export default function AdminPosts() {
                             type="text"
                             value={editForm.title}
                             onChange={(e) =>
-                              setEditForm({ ...editForm, title: e.target.value })
+                              setEditForm({
+                                ...editForm,
+                                title: e.target.value,
+                              })
                             }
                             className="edit-input"
                             placeholder="Title"
@@ -298,11 +314,16 @@ export default function AdminPosts() {
                           <select
                             value={editForm.status}
                             onChange={(e) =>
-                              setEditForm({ ...editForm, status: e.target.value })
+                              setEditForm({
+                                ...editForm,
+                                status: e.target.value,
+                              })
                             }
                             className="edit-select"
                           >
-                            <option value="sharing_idea">💡 Sharing Idea</option>
+                            <option value="sharing_idea">
+                              💡 Sharing Idea
+                            </option>
                             <option value="open_to_collaborate">
                               🤝 Open to Collaborate
                             </option>
@@ -347,7 +368,10 @@ export default function AdminPosts() {
                               </div>
                               <div className="admin-comments-list">
                                 {postComments.map((comment) => (
-                                  <div key={comment.id} className="admin-comment-item">
+                                  <div
+                                    key={comment.id}
+                                    className="admin-comment-item"
+                                  >
                                     <div className="admin-comment-header">
                                       <div className="admin-comment-user">
                                         <div className="admin-comment-avatar">
@@ -366,9 +390,13 @@ export default function AdminPosts() {
                                       </div>
                                       <div className="admin-comment-meta">
                                         <span className="admin-comment-date">
-                                          {new Date(comment.created_at).toLocaleDateString()}{" "}
+                                          {new Date(
+                                            comment.created_at,
+                                          ).toLocaleDateString()}{" "}
                                           at{" "}
-                                          {new Date(comment.created_at).toLocaleTimeString()}
+                                          {new Date(
+                                            comment.created_at,
+                                          ).toLocaleTimeString()}
                                         </span>
                                         <button
                                           className="admin-delete-comment"
@@ -440,7 +468,8 @@ export default function AdminPosts() {
             >
               <div className="modal-header">
                 <h3>
-                  Delete {showDeleteConfirm.type === "post" ? "Post" : "Comment"}
+                  Delete{" "}
+                  {showDeleteConfirm.type === "post" ? "Post" : "Comment"}
                 </h3>
                 <button onClick={() => setShowDeleteConfirm(null)}>
                   <X size={18} />

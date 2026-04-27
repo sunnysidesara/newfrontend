@@ -4,8 +4,10 @@ import { useContext, useEffect, useState, useRef, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { AuthContext } from "@/context/AuthContext";
 import { MessageContext } from "@/context/MessageContext";
+import { PartnershipContext } from "@/context/PartnershipContext";
 import Link from "next/link";
 import ProtectedRoute from "@/components/ProtectedRoute";
+import Loader from "@/components/Loader";
 import {
   Home,
   MessageSquare,
@@ -26,7 +28,10 @@ import "./messages.css";
 function AppNav() {
   const { user } = useContext(AuthContext);
   const { unreadCount } = useContext(MessageContext);
+  const { pendingRequests } = useContext(PartnershipContext);
   const router = useRouter();
+
+  const totalPendingRequests = pendingRequests.length;
 
   return (
     <header className="messages-nav">
@@ -38,6 +43,13 @@ function AppNav() {
           <Link href="/feed" className="messages-nav-link">
             <Home size={18} />
             <span>Feed</span>
+          </Link>
+          <Link href="/partners" className="messages-nav-link partners-link">
+            <Users size={18} />
+            <span>Partners</span>
+            {totalPendingRequests > 0 && (
+              <span className="nav-partner-badge">{totalPendingRequests}</span>
+            )}
           </Link>
           <Link href="/messages" className="messages-nav-link active">
             <MessageSquare size={18} />
@@ -130,7 +142,7 @@ export default function MessagesPage() {
         name: decodeURIComponent(userName),
         role: userRole,
       });
-      router.replace("/messages", { shallow: true });
+      router.replace("/messages");
     }
   }, [searchParams, selectedUser, router]);
 
@@ -374,7 +386,7 @@ export default function MessagesPage() {
                 </div>
                 <div className="conv-items">
                   {loading && filteredConversations.length === 0 ? (
-                    <div className="conv-loading">Loading...</div>
+                    <Loader text="Loading conversations..." />
                   ) : filteredConversations.length === 0 ? (
                     <div className="conv-empty-state">
                       <p>No conversations</p>
@@ -476,7 +488,7 @@ export default function MessagesPage() {
 
               <div className="chat-messages">
                 {loading && messages.length === 0 ? (
-                  <div className="chat-loading">Share your vision now!</div>
+                  <Loader text="Loading messages..." />
                 ) : messages.length === 0 ? (
                   <div className="chat-empty">
                     <p>No messages yet</p>

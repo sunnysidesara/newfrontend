@@ -5,11 +5,9 @@ import { AuthContext } from "@/context/AuthContext";
 import { AdminContext } from "@/context/AdminContext";
 import Link from "next/link";
 import ProtectedRoute from "@/components/ProtectedRoute";
+import Loader from "@/components/Loader";
 import {
   Home,
-  MessageSquare,
-  Settings,
-  User,
   Users,
   FileText,
   Trash2,
@@ -17,6 +15,8 @@ import {
   LogOut,
   LayoutDashboard,
   Mail,
+  Handshake,
+  Search,
 } from "lucide-react";
 import "../admin.css";
 
@@ -62,6 +62,14 @@ function AdminNav() {
             Posts
           </Link>
           <Link
+            href="/admin/partnerships"
+            className={`admin-nav-link ${activeTab === "partnerships" ? "active" : ""}`}
+            onClick={() => setActiveTab("partnerships")}
+          >
+            <Handshake size={16} />
+            Partnerships
+          </Link>
+          <Link
             href="/admin/messages"
             className={`admin-nav-link active`}
             onClick={() => setActiveTab("messages")}
@@ -98,6 +106,11 @@ export default function AdminMessages() {
   const [showDeleteConfirm, setShowDeleteConfirm] = useState<number | null>(
     null,
   );
+
+  // Search states
+  const [searchFromQuery, setSearchFromQuery] = useState("");
+  const [searchToQuery, setSearchToQuery] = useState("");
+
   const router = useRouter();
 
   useEffect(() => {
@@ -119,11 +132,25 @@ export default function AdminMessages() {
     loadMessages();
   };
 
+  // Filter messages based on search
+  const filteredMessages = messages.filter((msg) => {
+    // Search by sender name
+    const matchesFrom =
+      !searchFromQuery.trim() ||
+      msg.sender?.name?.toLowerCase().includes(searchFromQuery.toLowerCase());
+
+    // Search by receiver name
+    const matchesTo =
+      !searchToQuery.trim() ||
+      msg.receiver?.name?.toLowerCase().includes(searchToQuery.toLowerCase());
+
+    return matchesFrom && matchesTo;
+  });
+
   if (authLoading) {
     return (
-      <div className="admin-loading">
-        <div className="spinner"></div>
-        <p>Loading...</p>
+      <div className="admin-loading-black">
+        <Loader fullPage text="Authenticating..." />
       </div>
     );
   }
@@ -149,17 +176,75 @@ export default function AdminMessages() {
         <div className="admin-container">
           <div className="admin-header">
             <h1 className="admin-title">Message Management</h1>
-            <span className="post-count">{messages.length} total messages</span>
+            <span className="post-count">
+              {filteredMessages.length} total messages
+            </span>
+          </div>
+
+          {/* Dual Search Section */}
+          <div className="admin-dual-search">
+            <div className="admin-search-group">
+              <label className="admin-search-label">Search from:</label>
+              <div className="admin-search-wrapper">
+                <Search size={16} className="admin-search-icon" />
+                <input
+                  type="text"
+                  placeholder="Search by sender name..."
+                  value={searchFromQuery}
+                  onChange={(e) => setSearchFromQuery(e.target.value)}
+                  className="admin-search-input"
+                />
+                {searchFromQuery && (
+                  <button
+                    className="admin-search-clear"
+                    onClick={() => setSearchFromQuery("")}
+                  >
+                    <X size={14} />
+                  </button>
+                )}
+              </div>
+            </div>
+
+            <div className="admin-search-group">
+              <label className="admin-search-label">Search to:</label>
+              <div className="admin-search-wrapper">
+                <Search size={16} className="admin-search-icon" />
+                <input
+                  type="text"
+                  placeholder="Search by receiver name..."
+                  value={searchToQuery}
+                  onChange={(e) => setSearchToQuery(e.target.value)}
+                  className="admin-search-input"
+                />
+                {searchToQuery && (
+                  <button
+                    className="admin-search-clear"
+                    onClick={() => setSearchToQuery("")}
+                  >
+                    <X size={14} />
+                  </button>
+                )}
+              </div>
+            </div>
           </div>
 
           <div className="admin-card">
             {loading ? (
-              <div className="loading-spinner">Loading messages...</div>
-            ) : messages.length === 0 ? (
-              <div className="empty-state">No messages yet</div>
+              <div
+                className="admin-loading-black"
+                style={{ minHeight: "300px", position: "relative" }}
+              >
+                <Loader text="Loading messages..." />
+              </div>
+            ) : filteredMessages.length === 0 ? (
+              <div className="empty-state">
+                {searchFromQuery || searchToQuery
+                  ? "No messages match your search."
+                  : "No messages yet"}
+              </div>
             ) : (
               <div className="messages-list-admin">
-                {messages.map((msg) => (
+                {filteredMessages.map((msg) => (
                   <div key={msg.id} className="admin-message-item">
                     <div className="admin-message-header">
                       <div className="admin-message-users">
@@ -200,7 +285,7 @@ export default function AdminMessages() {
           </div>
         </div>
 
-        {/* Delete Confirmation Modal with clear message */}
+        {/* Delete Confirmation Modal */}
         {showDeleteConfirm !== null && (
           <div
             className="modal-overlay"

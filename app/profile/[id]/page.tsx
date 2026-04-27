@@ -1,20 +1,27 @@
 "use client";
-import { useState, useEffect, useContext } from "react";
+import { useState, useEffect, useContext, useCallback } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { AuthContext } from "@/context/AuthContext";
+import { MessageContext } from "@/context/MessageContext";
+import { PartnershipContext } from "@/context/PartnershipContext";
 import Link from "next/link";
 import PostCard from "@/components/PostCard";
 import ProtectedRoute from "@/components/ProtectedRoute";
+import Loader from "@/components/Loader";
 import {
-  Bell,
   Home,
   MessageSquare,
   Settings,
+  Users,
+  UserPlus,
+  UserCheck,
+  Clock,
+  Loader2,
+  XCircle,
+  UserMinus,
   User,
-  Edit2,
   X,
   Check,
-  LogOut,
 } from "lucide-react";
 import "./profile.css";
 
@@ -38,9 +45,21 @@ interface Post {
   user?: { id: number; name: string; role: string };
 }
 
+interface Partner {
+  id: number;
+  name: string;
+  role: string;
+  partnership_id: number;
+}
+
 function AppNav() {
   const { user } = useContext(AuthContext);
+  const { unreadCount } = useContext(MessageContext);
+  const { pendingRequests } = useContext(PartnershipContext);
   const router = useRouter();
+
+  const totalPendingRequests = pendingRequests.length;
+
   return (
     <header className="profile-nav">
       <div className="profile-nav-inner">
@@ -52,14 +71,32 @@ function AppNav() {
             <Home size={18} />
             <span>Feed</span>
           </Link>
+          <Link href="/partners" className="profile-nav-link partners-link">
+            <Users size={18} />
+            <span>Partners</span>
+            {totalPendingRequests > 0 && (
+              <span className="profile-nav-partner-badge">
+                {totalPendingRequests}
+              </span>
+            )}
+          </Link>
           <Link href="/messages" className="profile-nav-link">
             <MessageSquare size={18} />
             <span>Messages</span>
+            {unreadCount > 0 && (
+              <span className="profile-unread-badge">{unreadCount}</span>
+            )}
           </Link>
           <Link href="/settings" className="profile-nav-link">
             <Settings size={18} />
             <span>Settings</span>
           </Link>
+          {user?.is_admin && (
+            <Link href="/admin" className="profile-nav-link">
+              <User size={18} />
+              <span>Admin</span>
+            </Link>
+          )}
         </div>
         <div className="profile-nav-right">
           <button className="profile-icon-btn"></button>
@@ -82,17 +119,44 @@ function AppNav() {
 export default function ProfilePage() {
   const { id } = useParams();
   const router = useRouter();
-  const { user: currentUser, token, logout } = useContext(AuthContext);
+  const { user: currentUser, token } = useContext(AuthContext);
+
+  // All hooks at the top
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [userPosts, setUserPosts] = useState<Post[]>([]);
   const [loading, setLoading] = useState(true);
-  const [isEditing, setIsEditing] = useState(false);
-  const [bio, setBio] = useState("");
-  const [saving, setSaving] = useState(false);
-  const [saved, setSaved] = useState(false);
-  const [isLoggingOut, setIsLoggingOut] = useState(false);
+  const [partnershipStatus, setPartnershipStatus] = useState<{
+    status: string | null;
+    partnership_id: number | null;
+    is_requester: boolean;
+  } | null>(null);
+  const [partnershipLoading, setPartnershipLoading] = useState(false);
+  const [showPartnersModal, setShowPartnersModal] = useState(false);
+  const [partnersList, setPartnersList] = useState<Partner[]>([]);
+  const [partnersLoading, setPartnersLoading] = useState(false);
   const apiUrl = process.env.NEXT_PUBLIC_API_URL;
 
+  const profileId = Number(id);
+  const isOwner = currentUser?.id === profileId;
+
+  // ✅ FIX: Use useCallback to memoize fetch functions
+  const fetchPartnersList = useCallback(async () => {
+    if (!token) return;
+    setPartnersLoading(true);
+    try {
+      const res = await fetch(`${apiUrl}/partners`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      const data = await res.json();
+      setPartnersList(data.partners || []);
+    } catch (err) {
+      console.error("Error fetching partners:", err);
+    } finally {
+      setPartnersLoading(false);
+    }
+  }, [token, apiUrl]);
+
+  // All useEffect hooks
   useEffect(() => {
     if (!token || !id) return;
 
@@ -112,7 +176,6 @@ export default function ProfilePage() {
         const postsData = await postsRes.json();
 
         setProfile(profileData.user);
-        setBio(profileData.user.bio ?? "");
         setUserPosts(postsData.posts ?? []);
       } catch (error) {
         console.error("Error fetching profile:", error);
@@ -121,61 +184,139 @@ export default function ProfilePage() {
       }
     };
 
-    fetchProfile();
-  }, [id, token]);
+    const fetchPartnershipStatus = async () => {
+      if (isOwner) return;
+      try {
+        const res = await fetch(`${apiUrl}/partners/status/${id}`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        const data = await res.json();
+        setPartnershipStatus(data);
+      } catch (err) {
+        console.error("Error fetching partnership status:", err);
+      }
+    };
 
-  const handleSave = async () => {
-    setSaving(true);
-    setSaved(false);
+    fetchProfile();
+    fetchPartnershipStatus();
+
+    // ✅ Fetch partners list only if owner
+    if (isOwner) {
+      fetchPartnersList();
+    }
+  }, [id, token, apiUrl, isOwner, fetchPartnersList]); // ✅ Fixed dependencies
+
+  const handleOpenPartnersModal = async () => {
+    await fetchPartnersList();
+    setShowPartnersModal(true);
+  };
+
+  const handlePartnershipAction = async (action?: string) => {
+    if (!profile) return;
+    setPartnershipLoading(true);
     try {
-      const res = await fetch(`${apiUrl}/users/${id}`, {
-        method: "PUT",
+      if (action === "cancel" && partnershipStatus?.partnership_id) {
+        const res = await fetch(
+          `${apiUrl}/partners/${partnershipStatus.partnership_id}/cancel`,
+          {
+            method: "PUT",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
+            },
+          },
+        );
+        if (res.ok) {
+          setPartnershipStatus(null);
+          if (isOwner) await fetchPartnersList();
+        }
+      } else if (!partnershipStatus || partnershipStatus.status === null) {
+        const res = await fetch(`${apiUrl}/partners/request/${profile.id}`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        });
+        const data = await res.json();
+        if (res.ok) {
+          setPartnershipStatus({
+            status: "pending",
+            partnership_id: data.partnership?.id,
+            is_requester: true,
+          });
+        }
+      } else if (
+        partnershipStatus.status === "pending" &&
+        !partnershipStatus.is_requester
+      ) {
+        const res = await fetch(
+          `${apiUrl}/partners/${partnershipStatus.partnership_id}/accept`,
+          {
+            method: "PUT",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
+            },
+          },
+        );
+        if (res.ok) {
+          setPartnershipStatus({ ...partnershipStatus, status: "accepted" });
+          if (isOwner) await fetchPartnersList();
+        }
+      } else if (partnershipStatus.status === "accepted") {
+        const res = await fetch(
+          `${apiUrl}/partners/${partnershipStatus.partnership_id}`,
+          {
+            method: "DELETE",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
+            },
+          },
+        );
+        if (res.ok) {
+          setPartnershipStatus(null);
+          if (isOwner) await fetchPartnersList();
+        }
+      }
+    } catch (err) {
+      console.error("Error with partnership action:", err);
+    } finally {
+      setPartnershipLoading(false);
+    }
+  };
+
+  const handleRemovePartnerFromList = async (partnershipId: number) => {
+    try {
+      const res = await fetch(`${apiUrl}/partners/${partnershipId}`, {
+        method: "DELETE",
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify({ bio }), // Removed status
       });
-      const data = await res.json();
-      setProfile(data.user);
-      setIsEditing(false);
-      setSaved(true);
-      setTimeout(() => setSaved(false), 3000);
-    } catch (error) {
-      console.error("Error saving profile:", error);
-    } finally {
-      setSaving(false);
+      if (res.ok) {
+        await fetchPartnersList();
+        if (partnershipStatus?.partnership_id === partnershipId) {
+          setPartnershipStatus(null);
+        }
+      }
+    } catch (err) {
+      console.error("Error removing partner:", err);
     }
   };
 
-  const handleLogout = async () => {
-    setIsLoggingOut(true);
-    await logout();
-    router.push("/login");
-  };
+  // No-op handlers for PostCard
+  const handleUpdate = async (
+    id: number,
+    data: { title: string; body: string; status: string },
+  ) => {};
+  const handleDelete = async (id: number) => {};
 
-  const isOwner = currentUser?.id === Number(id);
-
-  // Skeleton loader
+  // Only ONE loading state - profile data
   if (loading) {
-    return (
-      <ProtectedRoute>
-        <div className="profile-page">
-          <AppNav />
-          <div className="profile-layout">
-            <div className="profile-skeleton-card">
-              <div className="profile-skeleton-cover" />
-              <div className="profile-skeleton-body">
-                <div className="profile-skeleton-avatar" />
-                <div className="profile-skeleton-name" />
-                <div className="profile-skeleton-role" />
-                <div className="profile-skeleton-bio" />
-              </div>
-            </div>
-          </div>
-        </div>
-      </ProtectedRoute>
-    );
+    return <Loader fullPage text="Loading profile..." />;
   }
 
   if (!profile) {
@@ -218,24 +359,78 @@ export default function ProfilePage() {
                 {isOwner && (
                   <div className="profile-hero-actions">
                     <button
-                      onClick={() => setIsEditing(!isEditing)}
+                      onClick={handleOpenPartnersModal}
                       className="profile-btn-outline"
                     >
-                      <Edit2 size={14} />
-                      {isEditing ? "Cancel" : "Edit Profile"}
+                      <Users size={14} />
+                      Partners ({partnersList.length})
                     </button>
-                    <Link href="/settings" className="profile-btn-outline">
-                      <Settings size={14} />
-                      Settings
-                    </Link>
-                    <button
-                      onClick={handleLogout}
-                      disabled={isLoggingOut}
-                      className="profile-btn-danger"
-                    >
-                      <LogOut size={14} />
-                      {isLoggingOut ? "..." : "Sign Out"}
-                    </button>
+                  </div>
+                )}
+                {!isOwner && (
+                  <div className="profile-hero-actions">
+                    {partnershipLoading ? (
+                      <button className="profile-btn-outline" disabled>
+                        <Loader2 size={14} className="profile-spin" />
+                        ...
+                      </button>
+                    ) : !partnershipStatus ||
+                      partnershipStatus.status === null ? (
+                      <button
+                        onClick={() => handlePartnershipAction()}
+                        className="profile-btn-partner"
+                      >
+                        <UserPlus size={14} />
+                        Add Partner
+                      </button>
+                    ) : partnershipStatus.status === "pending" ? (
+                      partnershipStatus.is_requester ? (
+                        <div className="profile-partner-actions">
+                          <span className="profile-badge-pending">
+                            <Clock size={14} />
+                            Request Sent
+                          </span>
+                          <button
+                            onClick={() => handlePartnershipAction("cancel")}
+                            className="profile-btn-cancel-request"
+                            title="Cancel Request"
+                          >
+                            <XCircle size={14} />
+                            Cancel
+                          </button>
+                        </div>
+                      ) : (
+                        <button
+                          onClick={() => handlePartnershipAction()}
+                          className="profile-btn-accept"
+                        >
+                          <Check size={14} />
+                          Accept Request
+                        </button>
+                      )
+                    ) : partnershipStatus.status === "accepted" ? (
+                      <div className="profile-partner-actions">
+                        <span className="profile-badge-partner">
+                          <UserCheck size={14} />
+                          Partner
+                        </span>
+                        <button
+                          onClick={() => handlePartnershipAction()}
+                          className="profile-btn-remove"
+                          title="Remove Partner"
+                        >
+                          <X size={14} />
+                        </button>
+                      </div>
+                    ) : partnershipStatus.status === "declined" ? (
+                      <button
+                        onClick={() => handlePartnershipAction()}
+                        className="profile-btn-partner"
+                      >
+                        <UserPlus size={14} />
+                        Add Partner
+                      </button>
+                    ) : null}
                   </div>
                 )}
               </div>
@@ -249,72 +444,28 @@ export default function ProfilePage() {
                 </span>
               </div>
 
-              {/* Status section REMOVED */}
-
               <div className="profile-meta-row">
-                <span className="profile-meta-item">✉ {profile.email}</span>
+                <span className="profile-meta-item">{profile.email}</span>
                 <span className="profile-meta-item">
-                  🗓 Joined{" "}
+                  Joined{" "}
                   {new Date(profile.created_at).toLocaleDateString("en-US", {
                     month: "long",
                     year: "numeric",
                   })}
                 </span>
               </div>
-            </div>
-          </div>
 
-          {/* About Card */}
-          <div className="profile-card">
-            <div className="profile-card-title">About</div>
-            {isEditing ? (
-              <div className="profile-edit-form">
-                <textarea
-                  className="profile-textarea"
-                  value={bio}
-                  onChange={(e) => setBio(e.target.value)}
-                  placeholder="Tell your story..."
-                  rows={4}
-                />
-                {/* Status dropdown REMOVED */}
-                {saved && (
-                  <div className="profile-success-msg">
-                    <Check size={14} />
-                    Changes saved successfully.
-                  </div>
-                )}
-                <div className="profile-edit-actions">
-                  <button
-                    onClick={() => setIsEditing(false)}
-                    className="profile-btn-cancel"
-                  >
-                    <X size={14} />
-                    Cancel
-                  </button>
-                  <button
-                    onClick={handleSave}
-                    disabled={saving}
-                    className="profile-btn-save"
-                  >
-                    {saving ? (
-                      "Saving..."
-                    ) : (
-                      <>
-                        <Check size={14} /> Save Changes
-                      </>
-                    )}
-                  </button>
-                </div>
+              {/* Bio Section */}
+              <div className="profile-bio-section">
+                <p
+                  className={
+                    profile.bio ? "profile-bio-display" : "profile-bio-empty"
+                  }
+                >
+                  {profile.bio || "No bio yet."}
+                </p>
               </div>
-            ) : (
-              <p
-                className={
-                  profile.bio ? "profile-bio-display" : "profile-bio-empty"
-                }
-              >
-                {profile.bio || "No bio yet."}
-              </p>
-            )}
+            </div>
           </div>
 
           {/* Posts Card */}
@@ -339,6 +490,8 @@ export default function ProfilePage() {
                     key={post.id}
                     post={post}
                     currentUserId={currentUser?.id || 0}
+                    onUpdate={handleUpdate}
+                    onDelete={handleDelete}
                   />
                 ))}
               </div>
@@ -346,6 +499,73 @@ export default function ProfilePage() {
           </div>
         </div>
       </div>
+
+      {/* Partners List Modal */}
+      {showPartnersModal && (
+        <div
+          className="modal-overlay"
+          onClick={() => setShowPartnersModal(false)}
+        >
+          <div className="modal-container" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header">
+              <h3>Your Partners ({partnersList.length})</h3>
+              <button onClick={() => setShowPartnersModal(false)}>
+                <X size={18} />
+              </button>
+            </div>
+            <div className="modal-body">
+              {partnersLoading ? (
+                <div className="center-msg">
+                  <Loader2 size={24} className="spin" />
+                  <p>Loading partners...</p>
+                </div>
+              ) : partnersList.length === 0 ? (
+                <div className="center-msg">
+                  <p>No partners yet.</p>
+                  <Link href="/partners" className="find-partners-link">
+                    Find Partners
+                  </Link>
+                </div>
+              ) : (
+                <div className="partners-list">
+                  {partnersList.map((partner) => (
+                    <div key={partner.id} className="partner-item">
+                      <div
+                        className="partner-info"
+                        onClick={() => {
+                          setShowPartnersModal(false);
+                          router.push(`/profile/${partner.id}`);
+                        }}
+                      >
+                        <div className="partner-avatar">
+                          {partner.name?.charAt(0)?.toUpperCase() || "?"}
+                        </div>
+                        <div>
+                          <div className="partner-name">{partner.name}</div>
+                          <div className="partner-role">
+                            {partner.role === "innovator"
+                              ? "Innovator"
+                              : "Investor"}
+                          </div>
+                        </div>
+                      </div>
+                      <button
+                        className="partner-remove"
+                        onClick={() =>
+                          handleRemovePartnerFromList(partner.partnership_id)
+                        }
+                        title="Remove Partner"
+                      >
+                        <UserMinus size={14} />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </ProtectedRoute>
   );
 }

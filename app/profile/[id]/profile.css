@@ -597,3 +597,358 @@
     font-size: 20px;
   }
 }
+
+/* =========================================================
+   PARTNERSHIP BUTTONS ON PROFILE
+   ========================================================= */
+.profile-btn-partner {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 18px;
+  background: var(--dark);
+  border: none;
+  border-radius: 40px;
+  font-size: 13px;
+  font-weight: 600;
+  color: white;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.profile-btn-partner:hover {
+  opacity: 0.9;
+}
+
+.profile-btn-accept {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 18px;
+  background: #000000;
+  border: none;
+  border-radius: 40px;
+  font-size: 13px;
+  font-weight: 600;
+  color: white;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.profile-btn-accept:hover {
+  background: #ffffff;
+  color: #000000;
+  border: #0b0303 solid 1px;
+}
+
+.profile-btn-remove {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  background: transparent;
+  border: 1px solid #000000;
+  border-radius: 50%;
+  font-size: 13px;
+  color: #1e0000;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.profile-btn-remove:hover {
+  background: #100a0a;
+  color: white;
+}
+
+.profile-badge-pending {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 18px;
+  background: #000000;
+  border-radius: 40px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #f3eded;
+}
+
+.profile-badge-partner {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 18px;
+  background: #ffffff;
+  border-radius: 40px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #000000;
+}
+
+.profile-partner-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.profile-spin {
+  animation: profileSpin 1s linear infinite;
+}
+
+@keyframes profileSpin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.profile-btn-outline:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Cancel Request Button */
+.profile-btn-cancel-request {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  background: rgb(246, 241, 241);
+  color: #180303;
+  border-radius: 40px;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+
+.profile-btn-cancel-request:hover {
+  background: #b5b3b3;
+  border-color: #161212;
+}
+
+.profile-btn-cancel-request:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Partner Actions Container */
+.profile-partner-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* Spin animation for loader */
+.profile-spin {
+  animation: profile-spin 1s linear infinite;
+}
+
+@keyframes profile-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Partners List Modal */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.8);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.modal-container {
+  background: #e2dcdc;
+  border-radius: 20px;
+  width: 90%;
+  max-width: 450px;
+  max-height: 80vh;
+  overflow: hidden;
+  border: 1px solid #333;
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 24px;
+  border-bottom: 1px solid #000000;
+}
+
+.modal-header h3 {
+  font-size: 18px;
+  font-weight: 700;
+  color: rgb(0, 0, 0);
+  margin: 0;
+}
+
+.modal-header button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #888;
+}
+
+.modal-body {
+  padding: 20px;
+  overflow-y: auto;
+  max-height: 60vh;
+}
+
+.partners-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.partner-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px;
+  background: #f6f3f3;
+  border-radius: 12px;
+}
+
+.partner-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex: 1;
+  cursor: pointer;
+}
+
+.partner-avatar {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: #000000;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 16px;
+}
+
+.partner-name {
+  font-size: 15px;
+  font-weight: 600;
+  color: rgb(0, 0, 0);
+}
+
+.partner-role {
+  font-size: 12px;
+  color: #313030;
+  text-transform: capitalize;
+}
+
+.partner-remove {
+  background: transparent;
+  border: 1px solid #000000;
+  border-radius: 30px;
+  padding: 6px 12px;
+  color: #000000;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 12px;
+}
+
+.partner-remove:hover {
+  background: #c3c1c1;
+  color: rgb(0, 0, 0);
+}
+
+.center-msg {
+  text-align: center;
+  padding: 40px 20px;
+  color: #888;
+}
+
+.center-msg p {
+  margin-bottom: 16px;
+}
+
+.find-partners-link {
+  display: inline-block;
+  padding: 8px 20px;
+  background: #000000;
+  color: white;
+  text-decoration: none;
+  border-radius: 40px;
+  font-size: 13px;
+}
+.find-partners-link:hover {
+  background: #d8d3d3;
+  border-color: #000000 1px solid;
+  color: #000000;
+}
+
+.spin {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.profile-unread-badge {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  background: #3e0000;
+  color: white;
+  font-size: 10px;
+  font-weight: 600;
+  padding: 2px 6px;
+  border-radius: 20px;
+  min-width: 18px;
+  text-align: center;
+  line-height: 1.2;
+}
+
+.profile-nav-link {
+  position: relative;
+}
+
+/* Partners nav link with badge */
+.profile-nav-link.partners-link {
+  position: relative;
+}
+
+.profile-nav-partner-badge {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  background: #550101;
+  color: white;
+  font-size: 10px;
+  font-weight: 600;
+  padding: 2px 6px;
+  border-radius: 20px;
+  min-width: 18px;
+  text-align: center;
+  line-height: 1.2;
+}

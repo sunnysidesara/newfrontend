@@ -5,6 +5,7 @@ import { AuthContext } from "@/context/AuthContext";
 import { AdminContext } from "@/context/AdminContext";
 import Link from "next/link";
 import ProtectedRoute from "@/components/ProtectedRoute";
+import Loader from "@/components/Loader";
 import {
   Home,
   MessageSquare,
@@ -22,6 +23,7 @@ import {
   Mail,
   Eye,
   EyeOff,
+  Handshake,
 } from "lucide-react";
 import "../admin.css";
 
@@ -63,6 +65,14 @@ function AdminNav() {
             Posts
           </Link>
           <Link
+            href="/admin/partnerships"
+            className={`admin-nav-link ${activeTab === "partnerships" ? "active" : ""}`}
+            onClick={() => setActiveTab("partnerships")}
+          >
+            <Handshake size={16} />
+            Partnerships
+          </Link>
+          <Link
             href="/admin/messages"
             className="admin-nav-link"
             onClick={() => setActiveTab("messages")}
@@ -75,17 +85,9 @@ function AdminNav() {
             Back to Feed
           </Link>
         </div>
-        <div className="admin-nav-right">
-          <div className="admin-user-info">
-            <span className="admin-user-name">{user?.name}</span>
-            <span className={`admin-user-role ${user?.role}`}>
-              {user?.role}
-            </span>
-          </div>
-          <button onClick={handleLogout} className="admin-logout-btn">
-            <LogOut size={16} /> Logout
-          </button>
-        </div>
+        <button onClick={handleLogout} className="admin-logout-btn">
+          <LogOut size={16} /> Logout
+        </button>
       </div>
     </header>
   );
@@ -228,9 +230,8 @@ export default function AdminUsers() {
 
   if (authLoading) {
     return (
-      <div className="admin-loading">
-        <div className="spinner"></div>
-        <p>Loading...</p>
+      <div className="admin-loading-black">
+        <Loader fullPage text="Authenticating..." />
       </div>
     );
   }
@@ -266,7 +267,12 @@ export default function AdminUsers() {
 
           <div className="admin-card">
             {loading ? (
-              <div className="loading-spinner">Loading users...</div>
+              <div
+                className="admin-loading-black"
+                style={{ minHeight: "300px", position: "relative" }}
+              >
+                <Loader text="Loading users..." />
+              </div>
             ) : (
               <table className="admin-table full-width">
                 <thead>

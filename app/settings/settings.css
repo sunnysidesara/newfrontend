@@ -675,7 +675,7 @@
 
 .delete-modal .modal-delete-account {
   padding: 10px 20px;
-  background: #dc2626;
+  background: #2b0101;
   border: none;
   border-radius: 40px;
   font-size: 14px;
@@ -685,10 +685,113 @@
 }
 
 .delete-modal .modal-delete-account:hover {
-  background: #b91c1c;
+  background: #a80404;
 }
 
 .delete-modal .modal-delete-account:disabled {
   opacity: 0.6;
   cursor: not-allowed;
+}
+
+.settings-unread-badge {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  background: #410101;
+  color: white;
+  font-size: 10px;
+  font-weight: 600;
+  padding: 2px 6px;
+  border-radius: 20px;
+  min-width: 18px;
+  text-align: center;
+  line-height: 1.2;
+}
+
+.settings-nav-link {
+  position: relative;
+}
+
+/* Delete Account Password Verification */
+.delete-password-section {
+  margin-top: 20px;
+  padding-top: 16px;
+  border-top: 1px solid #333;
+}
+
+.delete-password-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #fff;
+  margin-bottom: 10px;
+}
+
+.delete-password-wrapper {
+  position: relative;
+  width: 100%;
+  margin-bottom: 8px;
+}
+
+.delete-password-input {
+  width: 100%;
+  padding: 12px 40px 12px 14px;
+  background: #1a1a1a;
+  border: 1px solid #333;
+  border-radius: 12px;
+  font-size: 14px;
+  color: white;
+  font-family: inherit;
+}
+
+.delete-password-input:focus {
+  outline: none;
+  border-color: #666;
+}
+
+.delete-password-toggle {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  color: #888;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.delete-password-toggle:hover {
+  color: white;
+}
+
+.delete-password-hint {
+  font-size: 12px;
+  color: #f59e0b;
+  margin-top: 8px;
+  text-align: left;
+}
+
+/* Partners nav link with badge */
+.settings-nav-link.partners-link {
+  position: relative;
+}
+
+.nav-request-badge {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  background: #3f0000;
+  color: white;
+  font-size: 10px;
+  font-weight: 600;
+  padding: 2px 6px;
+  border-radius: 20px;
+  min-width: 18px;
+  text-align: center;
+  line-height: 1.2;
 }
