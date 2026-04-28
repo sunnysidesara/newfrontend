@@ -211,6 +211,18 @@
   font-weight: 600;
   color: #ffffff;
 }
+
+/* Sidebar user name - unique class */
+.sidebarUserName {
+  display: block;
+  font-size: 13px;
+  font-weight: 600;
+  color: #ffffff;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
 .userRole {
   font-size: 11px;
   color: #888888;
@@ -542,12 +554,102 @@
   align-items: center;
   gap: 6px;
   padding: 8px 16px;
-  background: #fef2f2;
-  color: #dc2626;
-  border: 1px solid #fecaca;
+  background: #f8f5f5;
+  color: #480101;
+  border: 1px solid #000000;
   border-radius: 8px;
   cursor: pointer;
 }
+
+/* Fullscreen centered loader */
+.fullscreenLoader {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.8);
+  backdrop-filter: blur(8px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  gap: 16px;
+}
+
+.fullscreenLoader p {
+  color: white;
+  font-size: 14px;
+  margin-top: 12px;
+}
+
+/* Centered spinner for search and filters */
+.centerLoader {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 300px;
+  text-align: center;
+  gap: 16px;
+  color: #888888;
+}
+
+.centerLoader p {
+  font-size: 14px;
+  margin: 0;
+}
+
+/* Spinner animation */
+.spinner {
+  width: 40px;
+  height: 40px;
+  border: 3px solid rgba(0, 0, 0, 0.1);
+  border-top-color: #111111;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+/* For white background (search results area) */
+.centerLoader .spinner {
+  border: 3px solid rgba(0, 0, 0, 0.1);
+  border-top-color: #111111;
+}
+
+/* For dark fullscreen overlay */
+.fullscreenLoader .spinner {
+  border: 3px solid rgba(255, 255, 255, 0.2);
+  border-top-color: #ffffff;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Center message for empty states */
+.centerMsg {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 20px;
+  text-align: center;
+  color: #888888;
+  gap: 16px;
+}
+
+.centerMsg svg {
+  color: #cccccc;
+}
+
+/* Existing spin class for loader icons */
+.spin {
+  animation: spin 1s linear infinite;
+}
+
 .centerMsg,
 .emptyState {
   text-align: center;

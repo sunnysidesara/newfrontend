@@ -298,7 +298,7 @@ export default function MessagesPage() {
 
           <nav className="sidebarNav">
             <Link href="/feed" className="navItem">
-              <TrendingUp size={18} />
+              <Home size={18} />
               <span>Feed</span>
             </Link>
             <Link href="/partners" className="navItem">
@@ -314,6 +314,10 @@ export default function MessagesPage() {
               {unreadCount > 0 && (
                 <span className="navBadge">{unreadCount}</span>
               )}
+            </Link>
+            <Link href="/trends" className="navItem">
+              <TrendingUp size={18} />
+              <span>Trends</span>
             </Link>
             <Link href="/settings" className="navItem">
               <Settings size={18} />
@@ -333,7 +337,7 @@ export default function MessagesPage() {
                 {user.name?.[0]?.toUpperCase() || "U"}
               </div>
               <div className="userDetails">
-                <span className="userName">{user.name}</span>
+                <span className="sidebarUserName">{user.name}</span>
                 <span className="userRole">
                   {user.role === "innovator" ? "Innovator" : "Investor"}
                 </span>
@@ -387,16 +391,16 @@ export default function MessagesPage() {
             ))}
           </div>
 
-          {/* Search Results */}
+          {/* Search Results with Centered Loading */}
           {searchQuery && (
             <div className="searchResultsSection">
               {searching ? (
-                <div className="centerMsg">
+                <div className="centerLoader">
                   <div className="spinner"></div>
                   <p>Searching users...</p>
                 </div>
               ) : searchResults.length === 0 ? (
-                <div className="emptyState">
+                <div className="centerMsg">
                   <Search size={48} />
                   <p>No users found</p>
                 </div>
@@ -428,19 +432,20 @@ export default function MessagesPage() {
           {/* Two Column Layout - Conversations + Chat */}
           {!searchQuery && (
             <div className="twoColumnLayout">
-              {/* Left Column - Conversations List */}
+              {/* Left Column - Conversations List with Centered Loading */}
               <div className="conversationsColumn">
                 <div className="conversationsHeader">
                   <h3>Messages</h3>
                 </div>
                 <div className="conversationsList">
                   {isLoading ? (
-                    <div className="centerMsg">
+                    <div className="centerLoader">
                       <div className="spinner"></div>
                       <p>Loading conversations...</p>
                     </div>
                   ) : filteredConversations.length === 0 ? (
-                    <div className="emptyState">
+                    <div className="centerMsg">
+                      <MessageSquare size={48} />
                       <p>No conversations found</p>
                     </div>
                   ) : (
@@ -505,7 +510,7 @@ export default function MessagesPage() {
                 </div>
               </div>
 
-              {/* Right Column - Chat Window */}
+              {/* Right Column - Chat Window with Centered Loading */}
               <div className="chatColumn">
                 {selectedUser ? (
                   <>
@@ -533,9 +538,13 @@ export default function MessagesPage() {
 
                     <div className="chatMessages">
                       {loading && messages.length === 0 ? (
-                        <Loader text="Loading messages..." />
+                        <div className="centerLoader">
+                          <div className="spinner"></div>
+                          <p>Loading messages...</p>
+                        </div>
                       ) : messages.length === 0 ? (
-                        <div className="emptyChat">
+                        <div className="centerMsg">
+                          <MessageSquare size={48} />
                           <p>No messages yet</p>
                           <p className="emptySubtext">
                             Send a message to start the conversation
@@ -595,7 +604,8 @@ export default function MessagesPage() {
                     </div>
                   </>
                 ) : (
-                  <div className="noChatSelected">
+                  <div className="centerMsg">
+                    <MessageSquare size={48} />
                     <p>Select a conversation</p>
                     <p className="emptySubtext">
                       Choose someone to start messaging
@@ -608,7 +618,7 @@ export default function MessagesPage() {
         </main>
       </div>
 
-      {/* Delete Options Modal - For Sender */}
+      {/* All modals remain the same */}
       {showDeleteOptions !== null && showDeleteOptions.isMine && (
         <div
           className="modalOverlay"
@@ -672,7 +682,6 @@ export default function MessagesPage() {
         </div>
       )}
 
-      {/* Delete Options Modal - For Receiver */}
       {showDeleteOptions !== null && !showDeleteOptions.isMine && (
         <div
           className="modalOverlay"
@@ -716,7 +725,6 @@ export default function MessagesPage() {
         </div>
       )}
 
-      {/* Permanent Deletion Confirmation Modal */}
       {showPermanentConfirm !== null && (
         <div
           className="modalOverlay"
@@ -765,7 +773,6 @@ export default function MessagesPage() {
         </div>
       )}
 
-      {/* Hide Conversation Confirmation Modal */}
       {showDeleteConfirm !== null && (
         <div
           className="modalOverlay"

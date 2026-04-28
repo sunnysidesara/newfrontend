@@ -54,38 +54,108 @@ export default function PartnersPage() {
   const [searchResults, setSearchResults] = useState<any[]>([]);
   const [searching, setSearching] = useState(false);
   const [actionLoading, setActionLoading] = useState<number | null>(null);
+  const [filterChanging, setFilterChanging] = useState(false);
 
   // Calculate total pending requests for badge
   const totalPendingRequests = pendingRequests.length;
 
+  // Initial fetch for partners and requests
   useEffect(() => {
     fetchPartners();
     fetchRequests();
     fetchSentRequests();
   }, []);
 
-  // Debounced search
+  // Fetch all users when "Everyone" filter is selected with no search query
   useEffect(() => {
     if (activeTab !== "search") return;
-    if (!searchQuery.trim() && !roleFilter) {
-      setSearchResults([]);
+
+    // When "Everyone" is selected (roleFilter === "") and no search query
+    if (roleFilter === "" && !searchQuery.trim()) {
+      const fetchAllUsers = async () => {
+        setFilterChanging(true);
+        setSearching(true);
+        try {
+          const results = await searchUsers("", undefined);
+          setSearchResults(results);
+        } catch (error) {
+          console.error("Error fetching all users:", error);
+          setSearchResults([]);
+        } finally {
+          setSearching(false);
+          setFilterChanging(false);
+        }
+      };
+      fetchAllUsers();
+    }
+  }, [roleFilter, activeTab, searchUsers]);
+
+  // Debounced search with centered loading (for when search query exists)
+  useEffect(() => {
+    if (activeTab !== "search") return;
+
+    // Skip if no search query and roleFilter is empty (handled by above useEffect)
+    if (!searchQuery.trim() && roleFilter === "") {
       return;
     }
+
+    // Skip if no search query but roleFilter has value (fetch filtered users)
+    if (!searchQuery.trim() && roleFilter !== "") {
+      const fetchFilteredUsers = async () => {
+        setFilterChanging(true);
+        setSearching(true);
+        try {
+          const results = await searchUsers("", roleFilter);
+          setSearchResults(results);
+        } catch (error) {
+          console.error("Error fetching filtered users:", error);
+          setSearchResults([]);
+        } finally {
+          setSearching(false);
+          setFilterChanging(false);
+        }
+      };
+      fetchFilteredUsers();
+      return;
+    }
+
+    // Search with query
+    setFilterChanging(true);
     const timer = setTimeout(async () => {
       setSearching(true);
-      const results = await searchUsers(searchQuery, roleFilter || undefined);
-      setSearchResults(results);
-      setSearching(false);
+      try {
+        const results = await searchUsers(searchQuery, roleFilter || undefined);
+        setSearchResults(results);
+      } catch (error) {
+        console.error("Error searching users:", error);
+        setSearchResults([]);
+      } finally {
+        setSearching(false);
+        setFilterChanging(false);
+      }
     }, 300);
-    return () => clearTimeout(timer);
+
+    return () => {
+      clearTimeout(timer);
+      setFilterChanging(false);
+    };
   }, [searchQuery, roleFilter, activeTab, searchUsers]);
 
   const handleSendRequest = async (userId: number) => {
     setActionLoading(userId);
     const result = await sendRequest(userId);
     if (result.success) {
-      const results = await searchUsers(searchQuery, roleFilter || undefined);
-      setSearchResults(results);
+      // Refresh current view
+      if (roleFilter === "" && !searchQuery.trim()) {
+        const results = await searchUsers("", undefined);
+        setSearchResults(results);
+      } else if (!searchQuery.trim() && roleFilter !== "") {
+        const results = await searchUsers("", roleFilter);
+        setSearchResults(results);
+      } else {
+        const results = await searchUsers(searchQuery, roleFilter || undefined);
+        setSearchResults(results);
+      }
       fetchSentRequests();
     }
     setActionLoading(null);
@@ -136,6 +206,25 @@ export default function PartnersPage() {
     { id: "requests", label: "Requests", count: totalPendingRequests },
   ];
 
+  // Show loading state for initial data fetch
+  if (loading && activeTab === "my-partners") {
+    return (
+      <div className={styles.fullscreenLoader}>
+        <div className={styles.spinner}></div>
+        <p>Loading partners...</p>
+      </div>
+    );
+  }
+
+  if (loading && activeTab === "requests") {
+    return (
+      <div className={styles.fullscreenLoader}>
+        <div className={styles.spinner}></div>
+        <p>Loading requests...</p>
+      </div>
+    );
+  }
+
   return (
     <div className={styles.app}>
       {/* BLACK SIDEBAR */}
@@ -152,7 +241,7 @@ export default function PartnersPage() {
 
         <nav className={styles.sidebarNav}>
           <Link href="/feed" className={styles.navItem}>
-            <TrendingUp size={18} />
+            <Home size={18} />
             <span>Feed</span>
           </Link>
           <Link
@@ -172,11 +261,14 @@ export default function PartnersPage() {
               <span className={styles.navBadge}>{unreadCount}</span>
             )}
           </Link>
+          <Link href="/trends" className={styles.navItem}>
+            <TrendingUp size={18} />
+            <span>Trends</span>
+          </Link>
           <Link href="/settings" className={styles.navItem}>
             <Settings size={18} />
             <span>Settings</span>
           </Link>
-          {/* ✅ ADD ADMIN LINK - only visible if user is admin */}
           {user.is_admin && (
             <Link href="/admin" className={styles.navItem}>
               <LayoutDashboard size={18} />
@@ -191,7 +283,7 @@ export default function PartnersPage() {
               {user.name?.[0]?.toUpperCase() || "U"}
             </div>
             <div className={styles.userDetails}>
-              <span className={styles.userName}>{user.name}</span>
+              <span className={styles.sidebarUserName}>{user.name}</span>
               <span className={styles.userRole}>
                 {user.role === "innovator" ? "Innovator" : "Investor"}
               </span>
@@ -237,7 +329,7 @@ export default function PartnersPage() {
               <input
                 type="text"
                 className={styles.searchInput}
-                placeholder="Search by name or email..."
+                placeholder="Search by name..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
               />
@@ -287,102 +379,100 @@ export default function PartnersPage() {
           {/* Search Tab Content */}
           {activeTab === "search" && (
             <div className={styles.searchResults}>
-              {searching ? (
-                <div className={styles.centerMsg}>
-                  <Loader2 size={24} className={styles.spin} />
-                  <p>Searching...</p>
+              {/* Centered loading when changing filters or searching */}
+              {filterChanging || searching ? (
+                <div className={styles.centerLoader}>
+                  <div className={styles.spinner}></div>
+                  <p>Searching for users...</p>
                 </div>
-              ) : searchQuery.trim() || roleFilter ? (
-                searchResults.length === 0 ? (
-                  <div className={styles.emptyState}>
-                    <p>No users found.</p>
-                  </div>
-                ) : (
-                  <div className={styles.userList}>
-                    {searchResults.map((u) => (
-                      <div key={u.id} className={styles.userCard}>
-                        <div
-                          className={styles.userCardLeft}
-                          onClick={() => router.push(`/profile/${u.id}`)}
-                        >
-                          <div className={styles.userAvatar}>
-                            {u.name?.charAt(0)?.toUpperCase() || "?"}
-                          </div>
-                          <div className={styles.userInfo}>
-                            <div className={styles.userName}>{u.name}</div>
-                            <div className={styles.userRole}>
-                              {u.role === "innovator"
-                                ? "Innovator"
-                                : "Investor"}
-                            </div>
-                            {u.bio && (
-                              <div className={styles.userBio}>{u.bio}</div>
-                            )}
-                          </div>
+              ) : searchResults.length === 0 ? (
+                <div className={styles.centerMsg}>
+                  <Search size={48} />
+                  <p>
+                    {searchQuery.trim() || roleFilter
+                      ? "No users found."
+                      : "Search for people to partner with"}
+                  </p>
+                </div>
+              ) : (
+                <div className={styles.userList}>
+                  {searchResults.map((u) => (
+                    <div key={u.id} className={styles.userCard}>
+                      <div
+                        className={styles.userCardLeft}
+                        onClick={() => router.push(`/profile/${u.id}`)}
+                      >
+                        <div className={styles.userAvatar}>
+                          {u.name?.charAt(0)?.toUpperCase() || "?"}
                         </div>
-                        <div className={styles.userCardRight}>
-                          {u.is_partner ? (
-                            <span className={styles.partnerBadge}>
-                              <UserCheck size={14} /> Partner
-                            </span>
-                          ) : u.is_request_sent ? (
-                            <button
-                              className={styles.cancelBtn}
-                              onClick={() =>
-                                handleCancelRequest(u.partnership_id)
-                              }
-                              disabled={actionLoading === u.partnership_id}
-                            >
-                              {actionLoading === u.partnership_id ? (
-                                <Loader2 size={14} className={styles.spin} />
-                              ) : (
-                                <XCircle size={14} />
-                              )}
-                              Cancel Request
-                            </button>
-                          ) : u.is_request_received ? (
-                            <div className={styles.actionBtns}>
-                              <button
-                                className={styles.acceptBtn}
-                                onClick={() =>
-                                  handleAcceptRequest(u.partnership_id)
-                                }
-                                disabled={actionLoading === u.partnership_id}
-                              >
-                                <Check size={14} /> Accept
-                              </button>
-                              <button
-                                className={styles.declineBtn}
-                                onClick={() =>
-                                  handleDeclineRequest(u.partnership_id)
-                                }
-                                disabled={actionLoading === u.partnership_id}
-                              >
-                                <X size={14} /> Decline
-                              </button>
-                            </div>
-                          ) : (
-                            <button
-                              className={styles.addBtn}
-                              onClick={() => handleSendRequest(u.id)}
-                              disabled={actionLoading === u.id}
-                            >
-                              {actionLoading === u.id ? (
-                                <Loader2 size={14} className={styles.spin} />
-                              ) : (
-                                <UserPlus size={14} />
-                              )}
-                              Add Partner
-                            </button>
+                        <div className={styles.userInfo}>
+                          <div className={styles.userName}>{u.name}</div>
+                          <div className={styles.userRole}>
+                            {u.role === "innovator" ? "Innovator" : "Investor"}
+                          </div>
+                          {u.bio && (
+                            <div className={styles.userBio}>{u.bio}</div>
                           )}
                         </div>
                       </div>
-                    ))}
-                  </div>
-                )
-              ) : (
-                <div className={styles.emptyState}>
-                  <p>Search for people to partner with</p>
+                      <div className={styles.userCardRight}>
+                        {u.is_partner ? (
+                          <span className={styles.partnerBadge}>
+                            <UserCheck size={14} /> Partner
+                          </span>
+                        ) : u.is_request_sent ? (
+                          <button
+                            className={styles.cancelBtn}
+                            onClick={() =>
+                              handleCancelRequest(u.partnership_id)
+                            }
+                            disabled={actionLoading === u.partnership_id}
+                          >
+                            {actionLoading === u.partnership_id ? (
+                              <Loader2 size={14} className={styles.spin} />
+                            ) : (
+                              <XCircle size={14} />
+                            )}
+                            Cancel Request
+                          </button>
+                        ) : u.is_request_received ? (
+                          <div className={styles.actionBtns}>
+                            <button
+                              className={styles.acceptBtn}
+                              onClick={() =>
+                                handleAcceptRequest(u.partnership_id)
+                              }
+                              disabled={actionLoading === u.partnership_id}
+                            >
+                              <Check size={14} /> Accept
+                            </button>
+                            <button
+                              className={styles.declineBtn}
+                              onClick={() =>
+                                handleDeclineRequest(u.partnership_id)
+                              }
+                              disabled={actionLoading === u.partnership_id}
+                            >
+                              <X size={14} /> Decline
+                            </button>
+                          </div>
+                        ) : (
+                          <button
+                            className={styles.addBtn}
+                            onClick={() => handleSendRequest(u.id)}
+                            disabled={actionLoading === u.id}
+                          >
+                            {actionLoading === u.id ? (
+                              <Loader2 size={14} className={styles.spin} />
+                            ) : (
+                              <UserPlus size={14} />
+                            )}
+                            Add Partner
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                  ))}
                 </div>
               )}
             </div>
@@ -391,13 +481,9 @@ export default function PartnersPage() {
           {/* My Partners Tab Content */}
           {activeTab === "my-partners" && (
             <div className={styles.partnersList}>
-              {loading ? (
+              {partners.length === 0 ? (
                 <div className={styles.centerMsg}>
-                  <Loader2 size={24} className={styles.spin} />
-                  <p>Loading partners...</p>
-                </div>
-              ) : partners.length === 0 ? (
-                <div className={styles.emptyState}>
+                  <Users size={48} />
                   <p>You have no partners yet.</p>
                   <button
                     className={styles.findBtn}
@@ -561,7 +647,7 @@ export default function PartnersPage() {
               )}
 
               {pendingRequests.length === 0 && sentRequests.length === 0 && (
-                <div className={styles.emptyState}>
+                <div className={styles.centerMsg}>
                   <p>No partnership requests.</p>
                   <button
                     className={styles.findBtn}

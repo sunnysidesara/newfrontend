@@ -269,7 +269,7 @@ export default function SettingsPage() {
 
           <nav className="sidebarNav">
             <Link href="/feed" className="navItem">
-              <TrendingUp size={18} />
+              <Home size={18} />
               <span>Feed</span>
             </Link>
             <Link href="/partners" className="navItem">
@@ -285,6 +285,10 @@ export default function SettingsPage() {
               {unreadCount > 0 && (
                 <span className="navBadge">{unreadCount}</span>
               )}
+            </Link>
+            <Link href="/trends" className="navItem">
+              <TrendingUp size={18} />
+              <span>Trends</span>
             </Link>
             <Link href="/settings" className="navItem active">
               <Settings size={18} />
@@ -572,9 +576,7 @@ export default function SettingsPage() {
                 </button>
               </div>
               <div className="modalBody">
-                <div className="deleteWarningIcon">
-                  <AlertTriangle size={48} />
-                </div>
+                <div className="deleteWarningIcon"></div>
                 <p>Are you sure you want to delete your account?</p>
                 <p className="modalWarning">
                   This action is permanent and cannot be undone. All your posts,

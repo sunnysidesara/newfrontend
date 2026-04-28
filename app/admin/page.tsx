@@ -213,7 +213,7 @@ export default function AdminDashboard() {
               </div>
               <div
                 className="adminStatusCard"
-                style={{ borderLeftColor: "#6ea593" }}
+                style={{ borderLeftColor: "#2f51d6" }}
               >
                 <span className="adminStatusLabel">Open to Collaborate</span>
                 <span className="adminStatusCount">
@@ -222,7 +222,7 @@ export default function AdminDashboard() {
               </div>
               <div
                 className="adminStatusCard"
-                style={{ borderLeftColor: "#647a9e" }}
+                style={{ borderLeftColor: "#0a6428" }}
               >
                 <span className="adminStatusLabel">Seeking Investment</span>
                 <span className="adminStatusCount">

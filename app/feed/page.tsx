@@ -140,7 +140,7 @@ export default function FeedPage() {
 
         <nav className={styles.sidebarNav}>
           <Link href="/feed" className={`${styles.navItem} ${styles.active}`}>
-            <TrendingUp size={18} />
+            <Home size={18} />
             <span>Feed</span>
           </Link>
           <Link href="/partners" className={styles.navItem}>
@@ -156,6 +156,10 @@ export default function FeedPage() {
             {unreadCount > 0 && (
               <span className={styles.navBadge}>{unreadCount}</span>
             )}
+          </Link>
+          <Link href="/trends" className={styles.navItem}>
+            <TrendingUp size={18} />
+            <span>Trends</span>
           </Link>
           <Link href="/settings" className={styles.navItem}>
             <Settings size={18} />

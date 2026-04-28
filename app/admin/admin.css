@@ -393,15 +393,27 @@
 }
 
 .adminRoleBadge.innovator {
-  background: rgba(96, 165, 250, 0.2);
-  color: #60a5fa;
-  border: 1px solid rgba(96, 165, 250, 0.3);
+  background: #2563eb; /* Solid blue */
+  color: #ffffff;
+  border: 1px solid #3b82f6;
+}
+
+.adminRoleBadge.roleInnovator {
+  background: #010824;
+  color: #ffffff;
+  border: 1px solid #010f21;
+}
+
+.adminRoleBadge.roleInvestor {
+  background: #012f0e;
+  color: #ffffff;
+  border: 1px solid #000e08;
 }
 
 .adminRoleBadge.investor {
-  background: rgba(34, 197, 94, 0.2);
-  color: #22c55e;
-  border: 1px solid rgba(34, 197, 94, 0.3);
+  background: #059669; /* Solid green */
+  color: #ffffff;
+  border: 1px solid #10b981;
 }
 
 .adminRoleBadgeSmall {
@@ -413,13 +425,13 @@
 }
 
 .adminRoleBadgeSmall.innovator {
-  background: rgba(96, 165, 250, 0.2);
-  color: #60a5fa;
+  background: rgb(2, 11, 21);
+  color: #ffffff;
 }
 
 .adminRoleBadgeSmall.investor {
-  background: rgba(34, 197, 94, 0.2);
-  color: #22c55e;
+  background: rgb(2, 51, 20);
+  color: #f3f8f5;
 }
 
 .adminStatusBadgeSmall {
@@ -432,17 +444,17 @@
 
 .adminStatusBadgeSmall.sharing_idea {
   background: rgba(245, 158, 11, 0.2);
-  color: #f59e0b;
+  color: #ffffff;
 }
 
 .adminStatusBadgeSmall.open_to_collaborate {
-  background: rgba(34, 197, 94, 0.2);
-  color: #22c55e;
+  background: rgb(6, 0, 28);
+  color: #ffffff;
 }
 
 .adminStatusBadgeSmall.seeking_investment {
-  background: rgba(239, 68, 68, 0.2);
-  color: #ef4444;
+  background: rgb(0, 33, 4);
+  color: #fffdfd;
 }
 
 .adminRecentList {
@@ -938,7 +950,7 @@
 }
 
 .adminIconBtn.edit {
-  color: #60a5fa;
+  color: #fcfcfc;
 }
 .adminIconBtn.role {
   color: #f59e0b;
@@ -1191,17 +1203,17 @@
 
 .adminStatusBadge.sharing_idea {
   background: rgba(245, 158, 11, 0.2);
-  color: #f59e0b;
+  color: #d3e393;
 }
 
 .adminStatusBadge.open_to_collaborate {
-  background: rgba(34, 197, 94, 0.2);
-  color: #22c55e;
+  background: rgba(3, 12, 97, 0.2);
+  color: #78c7f9;
 }
 
 .adminStatusBadge.seeking_investment {
-  background: rgba(239, 68, 68, 0.2);
-  color: #ef4444;
+  background: rgb(1, 53, 18);
+  color: #cffbe6;
 }
 
 .adminEditPostBtn {
@@ -1210,10 +1222,10 @@
   gap: 6px;
   padding: 4px 10px;
   background: transparent;
-  border: 1px solid #60a5fa;
+  border: 1px solid #ffffff;
   border-radius: 6px;
   font-size: 11px;
-  color: #60a5fa;
+  color: #fefefe;
   cursor: pointer;
 }
 
@@ -1639,6 +1651,7 @@
   display: flex;
   flex-direction: column;
   gap: 16px;
+  color: #cccccc;
 }
 
 .adminModalBody input,
@@ -1649,7 +1662,7 @@
   border: 1px solid rgba(255, 255, 255, 0.2);
   border-radius: 6px;
   font-size: 14px;
-  color: white;
+  color: #cccccc;
 }
 
 .adminPasswordWrapper {
@@ -1777,7 +1790,7 @@
   border-radius: 6px;
   font-size: 13px;
   font-weight: 600;
-  color: white;
+  color: rgb(255, 255, 255);
   cursor: pointer;
 }
 

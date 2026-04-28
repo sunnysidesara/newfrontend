@@ -79,7 +79,7 @@ function AppNav() {
 
       <nav className="sidebarNav">
         <Link href="/feed" className="navItem">
-          <TrendingUp size={18} />
+          <Home size={18} />
           <span>Feed</span>
         </Link>
         <Link href="/partners" className="navItem">
@@ -93,6 +93,10 @@ function AppNav() {
           <MessageSquare size={18} />
           <span>Messages</span>
           {unreadCount > 0 && <span className="navBadge">{unreadCount}</span>}
+        </Link>
+        <Link href="/trends" className="navItem">
+          <TrendingUp size={18} />
+          <span>Trends</span>
         </Link>
         <Link href="/settings" className="navItem">
           <Settings size={18} />
