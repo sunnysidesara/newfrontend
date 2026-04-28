@@ -8,12 +8,8 @@ import ProtectedRoute from "@/components/ProtectedRoute";
 import Loader from "@/components/Loader";
 import {
   Home,
-  MessageSquare,
-  Settings,
-  User,
   Users,
   FileText,
-  Trash2,
   X,
   LogOut,
   LayoutDashboard,
@@ -21,8 +17,11 @@ import {
   Loader2,
   Search,
   Handshake,
+  TrendingUp,
+  Settings,
+  User,
 } from "lucide-react";
-import "../../admin/admin.css";
+import "../admin.css";
 
 function AdminNav() {
   const { user, logout } = useContext(AuthContext);
@@ -35,56 +34,69 @@ function AdminNav() {
   };
 
   return (
-    <header className="admin-nav">
-      <div className="admin-nav-inner">
-        <Link href="/admin" className="admin-brand">
-          VENTURA ADMIN
+    <aside className="adminSidebar">
+      <div className="adminLogo">
+        <Link href="/admin" className="adminLogoLink">
+          <span className="adminLogoText">VENTURA ADMIN</span>
         </Link>
-        <div className="admin-nav-links">
-          <Link
-            href="/admin"
-            className="admin-nav-link"
-            onClick={() => setActiveTab("dashboard")}
-          >
-            <LayoutDashboard size={16} /> Dashboard
-          </Link>
-          <Link
-            href="/admin/users"
-            className="admin-nav-link"
-            onClick={() => setActiveTab("users")}
-          >
-            <Users size={16} /> Users
-          </Link>
-          <Link
-            href="/admin/posts"
-            className="admin-nav-link"
-            onClick={() => setActiveTab("posts")}
-          >
-            <FileText size={16} /> Posts
-          </Link>
-          <Link
-            href="/admin/partnerships"
-            className="admin-nav-link active"
-            onClick={() => setActiveTab("partnerships")}
-          >
-            <Handshake size={16} /> Partnerships
-          </Link>
-          <Link
-            href="/admin/messages"
-            className="admin-nav-link"
-            onClick={() => setActiveTab("messages")}
-          >
-            <Mail size={16} /> Messages
-          </Link>
-          <Link href="/feed" className="admin-nav-link">
-            <Home size={16} /> Back to Feed
-          </Link>
+      </div>
+
+      <nav className="adminSidebarNav">
+        <Link
+          href="/admin"
+          className="adminNavItem"
+          onClick={() => setActiveTab("dashboard")}
+        >
+          <LayoutDashboard size={18} /> Dashboard
+        </Link>
+        <Link
+          href="/admin/users"
+          className="adminNavItem"
+          onClick={() => setActiveTab("users")}
+        >
+          <Users size={18} /> Users
+        </Link>
+        <Link
+          href="/admin/posts"
+          className="adminNavItem"
+          onClick={() => setActiveTab("posts")}
+        >
+          <FileText size={18} /> Posts
+        </Link>
+        <Link
+          href="/admin/partnerships"
+          className="adminNavItem active"
+          onClick={() => setActiveTab("partnerships")}
+        >
+          <Handshake size={18} /> Partnerships
+        </Link>
+        <Link
+          href="/admin/messages"
+          className="adminNavItem"
+          onClick={() => setActiveTab("messages")}
+        >
+          <Mail size={18} /> Messages
+        </Link>
+        <Link href="/feed" className="adminNavItem">
+          <Home size={18} /> Back to Feed
+        </Link>
+      </nav>
+
+      <div className="adminSidebarFooter">
+        <div className="adminUserInfo">
+          <div className="adminUserAvatar">
+            {user?.name?.[0]?.toUpperCase() || "U"}
+          </div>
+          <div className="adminUserDetails">
+            <span className="adminUserName">{user?.name}</span>
+            <span className="adminUserRole">Admin</span>
+          </div>
         </div>
-        <button onClick={logout} className="admin-logout-btn">
-          <LogOut size={16} /> Logout
+        <button onClick={logout} className="adminLogoutBtn">
+          <LogOut size={16} /> Sign out
         </button>
       </div>
-    </header>
+    </aside>
   );
 }
 
@@ -112,13 +124,11 @@ export default function AdminPartnerships() {
   );
   const [loadingPartnerships, setLoadingPartnerships] = useState(false);
 
-  // Search users - runs EVERY TIME searchQuery changes
   useEffect(() => {
     if (!searchQuery.trim() || searchQuery.length < 2) {
       setSearchResults([]);
       return;
     }
-
     const timer = setTimeout(async () => {
       setSearching(true);
       setSearchError("");
@@ -131,12 +141,10 @@ export default function AdminPartnerships() {
         setSearching(false);
       }
     }, 300);
-
     return () => clearTimeout(timer);
   }, [searchQuery, adminSearchUsers]);
 
   const handleSelectUser = async (selected: any) => {
-    // Clear search results but keep search query
     setSearchResults([]);
     setSelectedUser(selected);
     setLoadingPartnerships(true);
@@ -204,7 +212,7 @@ export default function AdminPartnerships() {
 
   if (authLoading) {
     return (
-      <div className="admin-loading-black">
+      <div className="adminLoadingBlack">
         <Loader fullPage text="Authenticating..." />
       </div>
     );
@@ -213,8 +221,8 @@ export default function AdminPartnerships() {
   if (!user || !user.is_admin) {
     return (
       <ProtectedRoute>
-        <div className="admin-access-denied">
-          <div className="access-denied-card">
+        <div className="adminAccessDenied">
+          <div className="adminAccessDeniedCard">
             <h2>Access Denied</h2>
             <p>You don't have permission to access this page.</p>
             <Link href="/feed">Go to Feed</Link>
@@ -226,112 +234,105 @@ export default function AdminPartnerships() {
 
   return (
     <ProtectedRoute>
-      <div className="admin-page">
+      <div className="adminApp">
         <AdminNav />
-        <div className="admin-container">
-          <div className="admin-header">
-            <h1 className="admin-title">Partnership Management</h1>
+        <main className="adminMainContent">
+          <div className="adminHeaderRow">
+            <h1>Partnership Management</h1>
           </div>
 
-          {/* Search Section - Always visible, always works */}
-          <div className="partnership-search-section">
-            <label className="search-label">Search User</label>
-            <div className="partnership-search-card">
-              <div className="partnership-search-wrapper">
-                <Search size={18} className="search-icon" />
+          <div className="adminSearchSection">
+            <label className="adminSearchLabel">Search User</label>
+            <div className="adminSearchCard">
+              <div className="adminSearchWrapper">
+                <Search size={18} className="adminSearchIcon" />
                 <input
                   type="text"
                   placeholder="Search by name or email..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="partnership-search-input"
+                  className="adminSearchInput"
                 />
               </div>
             </div>
             {searching && (
-              <div className="search-loading-indicator">Searching...</div>
+              <div className="adminSearchLoading">Searching...</div>
             )}
             {searchError && (
-              <div className="search-error-msg">{searchError}</div>
+              <div className="adminSearchError">{searchError}</div>
             )}
           </div>
 
-          {/* Search Results - Show when there are results (overrides/above table) */}
           {searchResults.length > 0 && (
-            <div className="partnership-results-card">
-              <div className="results-header">
-                <span>Search Results ({searchResults.length})</span>
+            <div className="adminResultsCard">
+              <div className="adminResultsHeader">
+                Search Results ({searchResults.length})
               </div>
-              <div className="results-list">
+              <div className="adminResultsList">
                 {searchResults.map((result) => (
                   <div
                     key={result.id}
-                    className="result-item"
+                    className="adminResultItem"
                     onClick={() => handleSelectUser(result)}
                   >
-                    <div className="result-avatar">
+                    <div className="adminResultAvatar">
                       {result.name?.charAt(0)?.toUpperCase() || "?"}
                     </div>
-                    <div className="result-details">
-                      <div className="result-name">{result.name}</div>
-                      <div className="result-email">{result.email}</div>
-                      <div className="result-role-badge">
+                    <div className="adminResultDetails">
+                      <div className="adminResultName">{result.name}</div>
+                      <div className="adminResultEmail">{result.email}</div>
+                      <div className="adminResultRole">
                         {result.role === "innovator" ? "Innovator" : "Investor"}
                       </div>
                     </div>
-                    <div className="result-arrow">→</div>
+                    <div className="adminResultArrow">→</div>
                   </div>
                 ))}
               </div>
             </div>
           )}
 
-          {/* Selected User Partnerships Table - Shows below search results when a user is selected */}
           {selectedUser && (
-            <div className="partnerships-table-card">
-              <div className="table-header-section">
-                <h3 className="table-title">
-                  {selectedUser.name} - Partnerships
-                </h3>
+            <div className="adminTableCard">
+              <div className="adminTableHeader">
+                <h3>{selectedUser.name} - Partnerships</h3>
               </div>
-
-              <div className="data-table">
-                <div className="table-row-header">
-                  <div className="col-id">ID</div>
-                  <div className="col-name">Name</div>
-                  <div className="col-role">ROLE</div>
-                  <div className="col-status">Status</div>
-                  <div className="col-since">Since</div>
+              <div className="adminDataTable">
+                <div className="adminTableRowHeader">
+                  <div className="colId">ID</div>
+                  <div className="colName">Name</div>
+                  <div className="colRole">ROLE</div>
+                  <div className="colStatus">Status</div>
+                  <div className="colSince">Since</div>
                 </div>
-
                 {loadingPartnerships ? (
-                  <div className="table-loading">
-                    <Loader2 size={24} className="spin" />
+                  <div className="adminTableLoading">
+                    <Loader2 size={24} className="adminSpin" />
                     <p>Loading partnerships...</p>
                   </div>
                 ) : partnershipsList.length === 0 ? (
-                  <div className="table-empty">No partners yet.</div>
+                  <div className="adminTableEmpty">No partners yet.</div>
                 ) : (
                   partnershipsList.map((p) => (
-                    <div key={p.id} className="table-row">
-                      <div className="col-id">#{p.id}</div>
-                      <div className="col-name">{p.name}</div>
-                      <div className="col-role">
+                    <div key={p.id} className="adminTableRow">
+                      <div className="colId">#{p.id}</div>
+                      <div className="colName">{p.name}</div>
+                      <div className="colRole">
                         <span
-                          className={`role-badge ${p.role === "innovator" ? "role-innovator" : "role-investor"}`}
+                          className={`adminRoleBadge ${p.role === "innovator" ? "roleInnovator" : "roleInvestor"}`}
                         >
                           {p.role === "innovator" ? "Innovator" : "Investor"}
                         </span>
                       </div>
-                      <div className="col-status">{p.status}</div>
-                      <div className="col-since">{p.since}</div>
+                      <div className="colStatus">{p.status}</div>
+                      <div className="colSince">{p.since}</div>
                     </div>
                   ))
                 )}
               </div>
             </div>
           )}
-        </div>
+        </main>
       </div>
     </ProtectedRoute>
   );

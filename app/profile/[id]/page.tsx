@@ -22,6 +22,10 @@ import {
   User,
   X,
   Check,
+  TrendingUp,
+  LogOut,
+  LayoutDashboard,
+  Bell,
 } from "lucide-react";
 import "./profile.css";
 
@@ -53,66 +57,73 @@ interface Partner {
 }
 
 function AppNav() {
-  const { user } = useContext(AuthContext);
+  const { user, logout } = useContext(AuthContext);
   const { unreadCount } = useContext(MessageContext);
   const { pendingRequests } = useContext(PartnershipContext);
   const router = useRouter();
 
   const totalPendingRequests = pendingRequests.length;
 
+  const handleLogout = async () => {
+    await logout();
+    router.push("/login");
+  };
+
   return (
-    <header className="profile-nav">
-      <div className="profile-nav-inner">
-        <Link href="/feed" className="profile-brand">
-          VENTURA
+    <aside className="sidebar">
+      <div className="logo">
+        <Link href="/feed" className="logoLink">
+          <img src="/newhite.png" alt="VENTURA" className="logoImage" />
         </Link>
-        <div className="profile-nav-links">
-          <Link href="/feed" className="profile-nav-link">
-            <Home size={18} />
-            <span>Feed</span>
-          </Link>
-          <Link href="/partners" className="profile-nav-link partners-link">
-            <Users size={18} />
-            <span>Partners</span>
-            {totalPendingRequests > 0 && (
-              <span className="profile-nav-partner-badge">
-                {totalPendingRequests}
-              </span>
-            )}
-          </Link>
-          <Link href="/messages" className="profile-nav-link">
-            <MessageSquare size={18} />
-            <span>Messages</span>
-            {unreadCount > 0 && (
-              <span className="profile-unread-badge">{unreadCount}</span>
-            )}
-          </Link>
-          <Link href="/settings" className="profile-nav-link">
-            <Settings size={18} />
-            <span>Settings</span>
-          </Link>
-          {user?.is_admin && (
-            <Link href="/admin" className="profile-nav-link">
-              <User size={18} />
-              <span>Admin</span>
-            </Link>
+      </div>
+
+      <nav className="sidebarNav">
+        <Link href="/feed" className="navItem">
+          <TrendingUp size={18} />
+          <span>Feed</span>
+        </Link>
+        <Link href="/partners" className="navItem">
+          <Users size={18} />
+          <span>Partners</span>
+          {totalPendingRequests > 0 && (
+            <span className="navBadge">{totalPendingRequests}</span>
           )}
-        </div>
-        <div className="profile-nav-right">
-          <button className="profile-icon-btn"></button>
-          <div
-            className="profile-avatar-btn"
-            onClick={() => router.push(`/profile/${user?.id}`)}
-          >
-            {user?.avatar_url ? (
-              <img src={user.avatar_url} alt={user.name} />
-            ) : (
-              (user?.name?.charAt(0)?.toUpperCase() ?? "U")
-            )}
+        </Link>
+        <Link href="/messages" className="navItem">
+          <MessageSquare size={18} />
+          <span>Messages</span>
+          {unreadCount > 0 && <span className="navBadge">{unreadCount}</span>}
+        </Link>
+        <Link href="/settings" className="navItem">
+          <Settings size={18} />
+          <span>Settings</span>
+        </Link>
+        {user?.is_admin && (
+          <Link href="/admin" className="navItem">
+            <LayoutDashboard size={18} />
+            <span>Admin</span>
+          </Link>
+        )}
+      </nav>
+
+      <div className="sidebarFooter">
+        <div className="userInfo">
+          <div className="userAvatar">
+            {user?.name?.[0]?.toUpperCase() || "U"}
+          </div>
+          <div className="userDetails">
+            <span className="userName">{user?.name}</span>
+            <span className="userRole">
+              {user?.role === "innovator" ? "Innovator" : "Investor"}
+            </span>
           </div>
         </div>
+        <button onClick={handleLogout} className="logoutBtn">
+          <LogOut size={16} />
+          <span>Sign out</span>
+        </button>
       </div>
-    </header>
+    </aside>
   );
 }
 
@@ -121,7 +132,6 @@ export default function ProfilePage() {
   const router = useRouter();
   const { user: currentUser, token } = useContext(AuthContext);
 
-  // All hooks at the top
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [userPosts, setUserPosts] = useState<Post[]>([]);
   const [loading, setLoading] = useState(true);
@@ -139,7 +149,6 @@ export default function ProfilePage() {
   const profileId = Number(id);
   const isOwner = currentUser?.id === profileId;
 
-  // ✅ FIX: Use useCallback to memoize fetch functions
   const fetchPartnersList = useCallback(async () => {
     if (!token) return;
     setPartnersLoading(true);
@@ -156,7 +165,6 @@ export default function ProfilePage() {
     }
   }, [token, apiUrl]);
 
-  // All useEffect hooks
   useEffect(() => {
     if (!token || !id) return;
 
@@ -200,11 +208,10 @@ export default function ProfilePage() {
     fetchProfile();
     fetchPartnershipStatus();
 
-    // ✅ Fetch partners list only if owner
     if (isOwner) {
       fetchPartnersList();
     }
-  }, [id, token, apiUrl, isOwner, fetchPartnersList]); // ✅ Fixed dependencies
+  }, [id, token, apiUrl, isOwner, fetchPartnersList]);
 
   const handleOpenPartnersModal = async () => {
     await fetchPartnersList();
@@ -307,14 +314,12 @@ export default function ProfilePage() {
     }
   };
 
-  // No-op handlers for PostCard
   const handleUpdate = async (
     id: number,
     data: { title: string; body: string; status: string },
   ) => {};
   const handleDelete = async (id: number) => {};
 
-  // Only ONE loading state - profile data
   if (loading) {
     return <Loader fullPage text="Loading profile..." />;
   }
@@ -322,16 +327,16 @@ export default function ProfilePage() {
   if (!profile) {
     return (
       <ProtectedRoute>
-        <div className="profile-page">
+        <div className="app">
           <AppNav />
-          <div className="profile-layout">
-            <div className="profile-error-card">
+          <main className="mainContent">
+            <div className="emptyState">
               <p>User not found</p>
-              <Link href="/feed" className="profile-error-btn">
+              <Link href="/feed" className="findBtn">
                 Go to Feed
               </Link>
             </div>
-          </div>
+          </main>
         </div>
       </ProtectedRoute>
     );
@@ -339,17 +344,30 @@ export default function ProfilePage() {
 
   return (
     <ProtectedRoute>
-      <div className="profile-page">
+      <div className="app">
+        {/* BLACK SIDEBAR */}
         <AppNav />
-        <div className="profile-layout">
-          {/* Hero Card */}
-          <div className="profile-hero-card">
-            <div className="profile-cover">
-              <div className="profile-cover-pattern" />
+
+        {/* WHITE MAIN CONTENT */}
+        <main className="mainContent">
+          {/* Header with Avatar */}
+          <div className="headerRow">
+            <h1>Profile</h1>
+            <div className="headerRight">
+              <Link
+                href={`/profile/${currentUser?.id}`}
+                className="headerAvatar"
+              >
+                {currentUser?.name?.[0]?.toUpperCase() || "U"}
+              </Link>
             </div>
-            <div className="profile-hero-body">
-              <div className="profile-top-row">
-                <div className="profile-big-avatar">
+          </div>
+
+          {/* Hero Card */}
+          <div className="profileHeroCard">
+            <div className="profileHeroBody">
+              <div className="profileTopRow">
+                <div className="profileBigAvatar">
                   {profile.avatar_url ? (
                     <img src={profile.avatar_url} alt={profile.name} />
                   ) : (
@@ -357,10 +375,10 @@ export default function ProfilePage() {
                   )}
                 </div>
                 {isOwner && (
-                  <div className="profile-hero-actions">
+                  <div className="profileHeroActions">
                     <button
                       onClick={handleOpenPartnersModal}
-                      className="profile-btn-outline"
+                      className="secondaryBtn"
                     >
                       <Users size={14} />
                       Partners ({partnersList.length})
@@ -368,31 +386,31 @@ export default function ProfilePage() {
                   </div>
                 )}
                 {!isOwner && (
-                  <div className="profile-hero-actions">
+                  <div className="profileHeroActions">
                     {partnershipLoading ? (
-                      <button className="profile-btn-outline" disabled>
-                        <Loader2 size={14} className="profile-spin" />
+                      <button className="secondaryBtn" disabled>
+                        <Loader2 size={14} className="spin" />
                         ...
                       </button>
                     ) : !partnershipStatus ||
                       partnershipStatus.status === null ? (
                       <button
                         onClick={() => handlePartnershipAction()}
-                        className="profile-btn-partner"
+                        className="primaryBtn"
                       >
                         <UserPlus size={14} />
                         Add Partner
                       </button>
                     ) : partnershipStatus.status === "pending" ? (
                       partnershipStatus.is_requester ? (
-                        <div className="profile-partner-actions">
-                          <span className="profile-badge-pending">
+                        <div className="partnerActions">
+                          <span className="pendingBadge">
                             <Clock size={14} />
                             Request Sent
                           </span>
                           <button
                             onClick={() => handlePartnershipAction("cancel")}
-                            className="profile-btn-cancel-request"
+                            className="cancelRequestBtn"
                             title="Cancel Request"
                           >
                             <XCircle size={14} />
@@ -402,21 +420,21 @@ export default function ProfilePage() {
                       ) : (
                         <button
                           onClick={() => handlePartnershipAction()}
-                          className="profile-btn-accept"
+                          className="acceptBtn"
                         >
                           <Check size={14} />
                           Accept Request
                         </button>
                       )
                     ) : partnershipStatus.status === "accepted" ? (
-                      <div className="profile-partner-actions">
-                        <span className="profile-badge-partner">
+                      <div className="partnerActions">
+                        <span className="partnerBadge">
                           <UserCheck size={14} />
                           Partner
                         </span>
                         <button
                           onClick={() => handlePartnershipAction()}
-                          className="profile-btn-remove"
+                          className="removeBtn"
                           title="Remove Partner"
                         >
                           <X size={14} />
@@ -425,7 +443,7 @@ export default function ProfilePage() {
                     ) : partnershipStatus.status === "declined" ? (
                       <button
                         onClick={() => handlePartnershipAction()}
-                        className="profile-btn-partner"
+                        className="primaryBtn"
                       >
                         <UserPlus size={14} />
                         Add Partner
@@ -435,18 +453,18 @@ export default function ProfilePage() {
                 )}
               </div>
 
-              <div className="profile-name-block">
-                <h1 className="profile-full-name">{profile.name}</h1>
+              <div className="profileNameBlock">
+                <h1 className="profileFullName">{profile.name}</h1>
                 <span
-                  className={`profile-role-tag ${profile.role === "innovator" ? "role-innovator" : "role-investor"}`}
+                  className={`roleTag ${profile.role === "innovator" ? "roleInnovator" : "roleInvestor"}`}
                 >
                   {profile.role === "innovator" ? "Innovator" : "Investor"}
                 </span>
               </div>
 
-              <div className="profile-meta-row">
-                <span className="profile-meta-item">{profile.email}</span>
-                <span className="profile-meta-item">
+              <div className="profileMetaRow">
+                <span className="profileMetaItem">{profile.email}</span>
+                <span className="profileMetaItem">
                   Joined{" "}
                   {new Date(profile.created_at).toLocaleDateString("en-US", {
                     month: "long",
@@ -455,11 +473,10 @@ export default function ProfilePage() {
                 </span>
               </div>
 
-              {/* Bio Section */}
-              <div className="profile-bio-section">
+              <div className="profileBioSection">
                 <p
                   className={
-                    profile.bio ? "profile-bio-display" : "profile-bio-empty"
+                    profile.bio ? "profileBioDisplay" : "profileBioEmpty"
                   }
                 >
                   {profile.bio || "No bio yet."}
@@ -469,22 +486,21 @@ export default function ProfilePage() {
           </div>
 
           {/* Posts Card */}
-          <div className="profile-card">
-            <div className="profile-card-title">
-              Posts{" "}
-              <span className="profile-post-count">({userPosts.length})</span>
-            </div>
+          <div className="settingsCard">
+            <h3 className="cardTitle">
+              Posts <span className="postCount">({userPosts.length})</span>
+            </h3>
             {userPosts.length === 0 ? (
-              <div className="profile-no-posts">
+              <div className="emptyState">
                 <p>No posts yet.</p>
                 {isOwner && (
-                  <Link href="/feed" className="profile-no-posts-btn">
+                  <Link href="/feed" className="findBtn">
                     Create your first post
                   </Link>
                 )}
               </div>
             ) : (
-              <div className="profile-posts-list">
+              <div className="postsList">
                 {userPosts.map((post) => (
                   <PostCard
                     key={post.id}
@@ -497,52 +513,52 @@ export default function ProfilePage() {
               </div>
             )}
           </div>
-        </div>
+        </main>
       </div>
 
       {/* Partners List Modal */}
       {showPartnersModal && (
         <div
-          className="modal-overlay"
+          className="modalOverlay"
           onClick={() => setShowPartnersModal(false)}
         >
-          <div className="modal-container" onClick={(e) => e.stopPropagation()}>
-            <div className="modal-header">
+          <div className="modalContainer" onClick={(e) => e.stopPropagation()}>
+            <div className="modalHeader">
               <h3>Your Partners ({partnersList.length})</h3>
               <button onClick={() => setShowPartnersModal(false)}>
                 <X size={18} />
               </button>
             </div>
-            <div className="modal-body">
+            <div className="modalBody">
               {partnersLoading ? (
-                <div className="center-msg">
+                <div className="centerMsg">
                   <Loader2 size={24} className="spin" />
                   <p>Loading partners...</p>
                 </div>
               ) : partnersList.length === 0 ? (
-                <div className="center-msg">
+                <div className="centerMsg">
                   <p>No partners yet.</p>
-                  <Link href="/partners" className="find-partners-link">
+                  <Link href="/partners" className="findLink">
                     Find Partners
                   </Link>
                 </div>
               ) : (
-                <div className="partners-list">
+                <div className="partnersList">
                   {partnersList.map((partner) => (
-                    <div key={partner.id} className="partner-item">
+                    <div key={partner.id} className="partnerItem">
                       <div
-                        className="partner-info"
+                        className="partnerInfo"
                         onClick={() => {
                           setShowPartnersModal(false);
                           router.push(`/profile/${partner.id}`);
                         }}
                       >
-                        <div className="partner-avatar">
+                        <div className="partnerAvatar">
                           {partner.name?.charAt(0)?.toUpperCase() || "?"}
                         </div>
                         <div>
-                          <div className="partner-name">{partner.name}</div>
-                          <div className="partner-role">
+                          <div className="partnerName">{partner.name}</div>
+                          <div className="partnerRole">
                             {partner.role === "innovator"
                               ? "Innovator"
                               : "Investor"}
@@ -550,7 +566,7 @@ export default function ProfilePage() {
                         </div>
                       </div>
                       <button
-                        className="partner-remove"
+                        className="partnerRemoveBtn"
                         onClick={() =>
                           handleRemovePartnerFromList(partner.partnership_id)
                         }

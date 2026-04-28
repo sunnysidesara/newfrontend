@@ -10,6 +10,11 @@ import {
   X,
   Search,
   Users,
+  TrendingUp,
+  Mail,
+  Bell,
+  LogOut,
+  LayoutDashboard,
 } from "lucide-react";
 import PostCard from "@/components/PostCard";
 import PostForm from "@/components/PostForm";
@@ -25,7 +30,7 @@ import styles from "./feed.module.css";
 export default function FeedPage() {
   const { posts, loading, fetchPosts, createPost, updatePost, deletePost } =
     useContext(PostContext);
-  const { user } = useContext(AuthContext);
+  const { user, logout } = useContext(AuthContext);
   const { unreadCount } = useContext(MessageContext);
   const { pendingRequests } = useContext(PartnershipContext);
   const router = useRouter();
@@ -66,35 +71,12 @@ export default function FeedPage() {
     await deletePost(id);
   };
 
-  // ── USER-SPECIFIC STATS (for "My Stats" sidebar) ──
+  const handleLogout = async () => {
+    await logout();
+    router.push("/login");
+  };
 
-  const userStats = useMemo(() => {
-    const userPosts = posts.filter((p) => p.user_id === user?.id);
-    return {
-      total: userPosts.length,
-      ideas: userPosts.filter((p) => p.status === "sharing_idea").length,
-      collab: userPosts.filter((p) => p.status === "open_to_collaborate")
-        .length,
-      investment: userPosts.filter((p) => p.status === "seeking_investment")
-        .length,
-    };
-  }, [posts, user?.id]);
-
-  // ── DERIVED DATA (must be before early returns to keep hook order consistent) ──
-
-  // Unique users from posts (for sidebar — top users)
-  const uniqueUsers = useMemo(() => {
-    const map = new Map<number, { id: number; name: string; role: string }>();
-    posts.forEach((p) => {
-      if (p.user && !map.has(p.user.id)) {
-        map.set(p.user.id, p.user);
-      }
-    });
-    return Array.from(map.values()).slice(0, 5);
-  }, [posts]);
-
-  // ── FILTERING ──
-
+  // Get filtered posts
   const getFilteredPosts = () => {
     let result = [...posts];
 
@@ -121,6 +103,7 @@ export default function FeedPage() {
 
   const filteredPosts = getFilteredPosts();
 
+  // Get counts for filters
   const getFilterCount = (status: string | null) => {
     let base = posts;
     if (roleFilter !== "all") {
@@ -139,352 +122,281 @@ export default function FeedPage() {
     return base.filter((post) => post.user?.role === role).length;
   };
 
-  // Updated filters: Changed "Investors" to "Invest now"
-  const filters = [
-    { id: "all", label: "All Posts", count: getFilterCount(null) },
-    {
-      id: "sharing_idea",
-      label: "Ideas",
-      count: getFilterCount("sharing_idea"),
-    },
-    {
-      id: "open_to_collaborate",
-      label: "Collab",
-      count: getFilterCount("open_to_collaborate"),
-    },
-    {
-      id: "seeking_investment",
-      label: "Invest now",
-      count: getFilterCount("seeking_investment"),
-    },
-  ];
-
   if (!user) return null;
-
-  const userRoleLabel = user.role === "innovator" ? "Innovator" : "Investor";
 
   return (
     <div className={styles.app}>
-      {/* TOP NAV */}
-      <header className={styles.nav}>
-        <div className={styles.navInner}>
-          <Link href="/feed" className={styles.brand}>
-            VENTURA
+      {/* BLACK SIDEBAR */}
+      <aside className={styles.sidebar}>
+        <div className={styles.logo}>
+          <Link href="/feed" className="settings-logoLink">
+            <img
+              src="/newhite.png"
+              alt="VENTURA"
+              className="settings-logoImage"
+            />
           </Link>
-          <div className={styles.navLinks}>
-            <Link href="/feed" className={`${styles.navLink} ${styles.active}`}>
-              <Home size={18} />
-              <span>Feed</span>
+        </div>
+
+        <nav className={styles.sidebarNav}>
+          <Link href="/feed" className={`${styles.navItem} ${styles.active}`}>
+            <TrendingUp size={18} />
+            <span>Feed</span>
+          </Link>
+          <Link href="/partners" className={styles.navItem}>
+            <Users size={18} />
+            <span>Partners</span>
+            {totalPendingRequests > 0 && (
+              <span className={styles.navBadge}>{totalPendingRequests}</span>
+            )}
+          </Link>
+          <Link href="/messages" className={styles.navItem}>
+            <MessageSquare size={18} />
+            <span>Messages</span>
+            {unreadCount > 0 && (
+              <span className={styles.navBadge}>{unreadCount}</span>
+            )}
+          </Link>
+          <Link href="/settings" className={styles.navItem}>
+            <Settings size={18} />
+            <span>Settings</span>
+          </Link>
+          {user.is_admin && (
+            <Link href="/admin" className={styles.navItem}>
+              <LayoutDashboard size={18} />
+              <span>Admin</span>
             </Link>
-            <Link
-              href="/partners"
-              className={`${styles.navLink} partners-link`}
-            >
-              <Users size={18} />
-              <span>Partners</span>
-              {totalPendingRequests > 0 && (
-                <span className={styles.navPartnerBadge}>
-                  {totalPendingRequests}
-                </span>
-              )}
-            </Link>
-            <Link href="/messages" className={styles.navLink}>
-              <MessageSquare size={18} />
-              <span>Messages</span>
-              {unreadCount > 0 && (
-                <span className={styles.unreadBadge}>{unreadCount}</span>
-              )}
-            </Link>
-            <Link href="/settings" className={styles.navLink}>
-              <Settings size={18} />
-              <span>Settings</span>
-            </Link>
-            {user.is_admin && (
-              <Link href="/admin" className={styles.navLink}>
-                <User size={18} />
-                <span>Admin</span>
-              </Link>
+          )}
+        </nav>
+
+        <div className={styles.sidebarFooter}>
+          <div className={styles.userInfo}>
+            <div className={styles.userAvatar}>
+              {user.name?.[0]?.toUpperCase() || "U"}
+            </div>
+            <div className={styles.userDetails}>
+              <span className={styles.userName}>{user.name}</span>
+              <span className={styles.userRole}>
+                {user.role === "innovator" ? "Innovator" : "Investor"}
+              </span>
+            </div>
+          </div>
+          <button onClick={handleLogout} className={styles.logoutBtn}>
+            <LogOut size={16} />
+            <span>Sign out</span>
+          </button>
+        </div>
+      </aside>
+
+      {/* WHITE MAIN CONTENT */}
+      <main className={styles.mainContent}>
+        {/* Header with Search and Avatar on same line */}
+        <div className={styles.headerRow}>
+          <div className={styles.searchWrapper}>
+            <Search size={18} className={styles.searchIcon} />
+            <input
+              type="text"
+              className={styles.searchInput}
+              placeholder="Search posts by title, content, or people..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
+            {searchQuery && (
+              <button
+                className={styles.searchClear}
+                onClick={() => setSearchQuery("")}
+              >
+                <X size={14} />
+              </button>
             )}
           </div>
-          <div className={styles.navRight}>
-            <Link href={`/profile/${user.id}`} className={styles.avatarBtn}>
+          <div className={styles.headerRight}>
+            <Link href={`/profile/${user.id}`} className={styles.headerAvatar}>
               {user.name?.[0]?.toUpperCase() || "U"}
             </Link>
           </div>
         </div>
-      </header>
 
-      {/* CENTER FEED */}
-      <div className={styles.centerLayout}>
-        <div className={styles.feedLayout}>
-          {/* ─── LEFT SIDEBAR - Filters ─── */}
-          <aside className={styles.leftSidebar}>
-            <div className={styles.leftSidebarInner}>
-              <div className={styles.sidebarCard}>
-                <h3 className={styles.sidebarTitle}>People</h3>
-                <div className={styles.filterVertical}>
-                  <button
-                    className={`${styles.filterVerticalBtn} ${
-                      roleFilter === "all" ? styles.activeStatus : ""
-                    }`}
-                    onClick={() => setRoleFilter("all")}
-                  >
-                    <Users size={16} />
-                    <span>Everyone</span>
-                    <span className={styles.filterCountPill}>
-                      {getRoleCount("all")}
-                    </span>
-                  </button>
-                  <button
-                    className={`${styles.filterVerticalBtn} ${
-                      roleFilter === "innovator" ? styles.activeInnovator : ""
-                    }`}
-                    onClick={() => setRoleFilter("innovator")}
-                  >
-                    <span className={styles.roleDot}>I</span>
-                    <span>Innovators</span>
-                    <span className={styles.filterCountPill}>
-                      {getRoleCount("innovator")}
-                    </span>
-                  </button>
-                  <button
-                    className={`${styles.filterVerticalBtn} ${
-                      roleFilter === "investor" ? styles.activeInvestor : ""
-                    }`}
-                    onClick={() => setRoleFilter("investor")}
-                  >
-                    <span className={styles.roleDot}>V</span>
-                    <span>Investors</span>
-                    <span className={styles.filterCountPill}>
-                      {getRoleCount("investor")}
-                    </span>
-                  </button>
-                </div>
+        {/* Create Post Section */}
+        <div className={styles.createPostSection}>
+          {!showPostForm ? (
+            <div className={styles.createPostHeader}>
+              <div className={styles.createPostAvatar}>
+                {user.name?.[0]?.toUpperCase() || "U"}
               </div>
-
-              {/* Updated: Changed "Post Type" to "Invest now" */}
-              <div className={styles.sidebarCard}>
-                <h3 className={styles.sidebarTitle}>Invest now</h3>
-                <div className={styles.filterVertical}>
-                  {filters.map((filter) => (
-                    <button
-                      key={filter.id}
-                      className={`${styles.filterVerticalBtn} ${
-                        activeFilter === filter.id ? styles.activeStatus : ""
-                      }`}
-                      onClick={() => setActiveFilter(filter.id)}
-                    >
-                      <span className={styles.statusLabel}>{filter.label}</span>
-                      <span className={styles.filterCountPill}>
-                        {filter.count}
-                      </span>
-                    </button>
-                  ))}
-                </div>
-              </div>
+              <button
+                className={styles.createPostTrigger}
+                onClick={() => setShowPostForm(true)}
+              >
+                What's on your mind, {user.name?.split(" ")[0]}?
+              </button>
             </div>
-          </aside>
+          ) : (
+            <div className={styles.createPostFormWrapper}>
+              <div className={styles.createPostFormHeader}>
+                <h4>Create Post</h4>
+                <button
+                  className={styles.cancelPostBtn}
+                  onClick={handleCancelForm}
+                >
+                  Cancel
+                </button>
+              </div>
+              <PostForm onSubmit={handleCreate} onClose={handleCancelForm} />
+            </div>
+          )}
+        </div>
 
-          {/* ─── MAIN FEED ─── */}
-          <main className={styles.feedContainer}>
-            {/* Search Bar */}
-            <div className={styles.searchContainer}>
-              <Search size={16} className={styles.searchIcon} />
-              <input
-                type="text"
-                className={styles.searchInput}
-                placeholder="Search posts by title, content, or people..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-              />
+        {/* FILTERS */}
+        <div className={styles.filtersRow}>
+          {/* Filter by People */}
+          <div className={styles.filterGroup}>
+            <label className={styles.filterLabel}>FILTER BY PEOPLE</label>
+            <div className={styles.filterButtons}>
+              <button
+                className={`${styles.filterBtn} ${roleFilter === "all" ? styles.active : ""}`}
+                onClick={() => setRoleFilter("all")}
+              >
+                Everyone{" "}
+                <span className={styles.filterCount}>
+                  {getRoleCount("all")}
+                </span>
+              </button>
+              <button
+                className={`${styles.filterBtn} ${roleFilter === "innovator" ? styles.active : ""}`}
+                onClick={() => setRoleFilter("innovator")}
+              >
+                Innovators{" "}
+                <span className={styles.filterCount}>
+                  {getRoleCount("innovator")}
+                </span>
+              </button>
+              <button
+                className={`${styles.filterBtn} ${roleFilter === "investor" ? styles.active : ""}`}
+                onClick={() => setRoleFilter("investor")}
+              >
+                Investors{" "}
+                <span className={styles.filterCount}>
+                  {getRoleCount("investor")}
+                </span>
+              </button>
+            </div>
+          </div>
+
+          {/* Filter by Post Type */}
+          <div className={styles.filterGroup}>
+            <label className={styles.filterLabel}>FILTER BY POST TYPE</label>
+            <div className={styles.filterButtons}>
+              <button
+                className={`${styles.filterBtn} ${activeFilter === "all" ? styles.active : ""}`}
+                onClick={() => setActiveFilter("all")}
+              >
+                All Posts{" "}
+                <span className={styles.filterCount}>
+                  {getFilterCount(null)}
+                </span>
+              </button>
+              <button
+                className={`${styles.filterBtn} ${activeFilter === "sharing_idea" ? styles.active : ""}`}
+                onClick={() => setActiveFilter("sharing_idea")}
+              >
+                Ideas{" "}
+                <span className={styles.filterCount}>
+                  {getFilterCount("sharing_idea")}
+                </span>
+              </button>
+              <button
+                className={`${styles.filterBtn} ${activeFilter === "open_to_collaborate" ? styles.active : ""}`}
+                onClick={() => setActiveFilter("open_to_collaborate")}
+              >
+                Collab{" "}
+                <span className={styles.filterCount}>
+                  {getFilterCount("open_to_collaborate")}
+                </span>
+              </button>
+              <button
+                className={`${styles.filterBtn} ${activeFilter === "seeking_investment" ? styles.active : ""}`}
+                onClick={() => setActiveFilter("seeking_investment")}
+              >
+                Invest{" "}
+                <span className={styles.filterCount}>
+                  {getFilterCount("seeking_investment")}
+                </span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {/* Posts List */}
+        <div className={styles.postsContainer}>
+          {loading ? (
+            <>
+              <div className={styles.skeletonCard} />
+              <div className={styles.skeletonCard} />
+              <div className={styles.skeletonCard} />
+            </>
+          ) : filteredPosts.length === 0 ? (
+            <div className={styles.emptyState}>
+              <p>No posts found</p>
               {searchQuery && (
                 <button
-                  className={styles.clearSearch}
                   onClick={() => setSearchQuery("")}
+                  className={styles.clearSearchBtn}
                 >
-                  <X size={14} />
+                  Clear search
                 </button>
               )}
-            </div>
-
-            {/* Create Post Card - REMOVED the role badge */}
-            <div className={styles.createPostCard}>
-              {!showPostForm ? (
-                <div className={styles.createPostHeader}>
-                  <div className={styles.createPostAvatar}>
-                    {user.name?.[0]?.toUpperCase() || "U"}
-                  </div>
+              {!searchQuery &&
+                activeFilter === "all" &&
+                roleFilter === "all" && (
                   <button
-                    className={styles.createPostTrigger}
                     onClick={() => setShowPostForm(true)}
+                    className={styles.createFirstBtn}
                   >
-                    What's your vision, {user.name?.split(" ")[0]}?
+                    Create your first post
                   </button>
-                </div>
-              ) : (
-                <div className={styles.createPostFormContainer}>
-                  <div className={styles.createPostFormHeader}>
-                    <h4>Create Post</h4>
-                    <button
-                      className={styles.closeFormBtn}
-                      onClick={handleCancelForm}
-                    >
-                      <X size={18} />
-                    </button>
-                  </div>
-                  <PostForm
-                    onSubmit={handleCreate}
-                    onClose={handleCancelForm}
-                  />
-                </div>
-              )}
+                )}
             </div>
+          ) : (
+            filteredPosts.map((post) => (
+              <PostCard
+                key={post.id}
+                post={post}
+                currentUserId={user.id}
+                onUpdate={handleUpdate}
+                onDelete={handleDelete}
+              />
+            ))
+          )}
+        </div>
+      </main>
 
-            {/* Mobile Create Post Button */}
-            <button
-              className={styles.mobileCreateBtn}
-              onClick={() => setShowMobileModal(true)}
-            >
-              <PlusCircle size={18} /> Create Post
-            </button>
-
-            {/* Mobile Modal */}
-            {showMobileModal && (
-              <div
-                className={styles.modalOverlay}
+      {/* Mobile Create Post Modal */}
+      {showMobileModal && (
+        <div
+          className={styles.modalOverlay}
+          onClick={() => setShowMobileModal(false)}
+        >
+          <div
+            className={styles.modalContainer}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className={styles.modalHeader}>
+              <h3>Create Post</h3>
+              <button
+                className={styles.modalClose}
                 onClick={() => setShowMobileModal(false)}
               >
-                <div
-                  className={styles.modalContainer}
-                  onClick={(e) => e.stopPropagation()}
-                >
-                  <div className={styles.modalHeader}>
-                    <h3>Create Post</h3>
-                    <button
-                      className={styles.modalClose}
-                      onClick={() => setShowMobileModal(false)}
-                    >
-                      ×
-                    </button>
-                  </div>
-                  <PostForm
-                    onSubmit={handleCreate}
-                    onClose={() => setShowMobileModal(false)}
-                  />
-                </div>
-              </div>
-            )}
-
-            {/* Feed List with Loading Animation */}
-            {loading ? (
-              <>
-                <Loader text="Loading posts..." />
-                <div className={styles.skeletonCard} />
-                <div className={styles.skeletonCard} />
-              </>
-            ) : filteredPosts.length === 0 ? (
-              <div className={styles.emptyFeed}>
-                {searchQuery ? (
-                  <>
-                    <p>No posts match "{searchQuery}".</p>
-                    <button onClick={() => setSearchQuery("")}>
-                      Clear search
-                    </button>
-                  </>
-                ) : (
-                  <>
-                    <p>No posts found in this category.</p>
-                    <button onClick={() => setActiveFilter("all")}>
-                      View all posts
-                    </button>
-                  </>
-                )}
-              </div>
-            ) : (
-              filteredPosts.map((post) => (
-                <PostCard
-                  key={post.id}
-                  post={post}
-                  currentUserId={user.id}
-                  onUpdate={handleUpdate}
-                  onDelete={handleDelete}
-                />
-              ))
-            )}
-          </main>
-
-          {/* ─── RIGHT SIDEBAR - People & Stats ─── */}
-          <aside className={styles.rightSidebar}>
-            <div className={styles.sidebarCard}>
-              <h3 className={styles.sidebarTitle}>Active People</h3>
-              {uniqueUsers.length === 0 ? (
-                <p style={{ fontSize: 13, color: "var(--muted)" }}>
-                  No active users yet.
-                </p>
-              ) : (
-                uniqueUsers.map((u) => (
-                  <Link
-                    key={u.id}
-                    href={`/profile/${u.id}`}
-                    className={styles.suggestedUser}
-                  >
-                    <div className={styles.suggestedAvatar}>
-                      {u.name?.[0]?.toUpperCase() || "?"}
-                    </div>
-                    <div className={styles.suggestedInfo}>
-                      <div className={styles.suggestedName}>{u.name}</div>
-                      <div className={styles.suggestedRole}>
-                        {u.role === "innovator" ? "Innovator" : "Investor"}
-                      </div>
-                    </div>
-                    <span
-                      className={styles.suggestedMsgBtn}
-                      onClick={(e) => {
-                        e.preventDefault();
-                        e.stopPropagation();
-                        router.push(
-                          `/messages?userId=${u.id}&userName=${encodeURIComponent(u.name)}&userRole=${u.role}`,
-                        );
-                      }}
-                    >
-                      Message
-                    </span>
-                  </Link>
-                ))
-              )}
+                ×
+              </button>
             </div>
-
-            <div className={styles.sidebarCard}>
-              <h3 className={styles.sidebarTitle}>My Stats</h3>
-              <div className={styles.statsList}>
-                <div className={styles.statRow}>
-                  <span className={styles.statLabel}>Total Posts</span>
-                  <span className={styles.statValue}>{userStats.total}</span>
-                </div>
-                <div className={styles.statRow}>
-                  <span className={styles.statLabel}>Ideas Shared</span>
-                  <span className={styles.statValue}>{userStats.ideas}</span>
-                </div>
-                <div className={styles.statRow}>
-                  <span className={styles.statLabel}>Open to Collab</span>
-                  <span className={styles.statValue}>{userStats.collab}</span>
-                </div>
-                <div className={styles.statRow}>
-                  <span className={styles.statLabel}>Seeking Investment</span>
-                  <span className={styles.statValue}>
-                    {userStats.investment}
-                  </span>
-                </div>
-                <div className={styles.statDivider} />
-                <div className={styles.statRow}>
-                  <span className={styles.statLabel}>Your Role</span>
-                  <span className={styles.statRoleBadge}>{userRoleLabel}</span>
-                </div>
-              </div>
-            </div>
-          </aside>
+            <PostForm
+              onSubmit={handleCreate}
+              onClose={() => setShowMobileModal(false)}
+            />
+          </div>
         </div>
-      </div>
+      )}
     </div>
   );
 }
