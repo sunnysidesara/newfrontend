@@ -605,8 +605,6 @@ export default function MessagesPage() {
                   </>
                 ) : (
                   <div className="centerMsg">
-                    <MessageSquare size={48} />
-                    <p>Select a conversation</p>
                     <p className="emptySubtext">
                       Choose someone to start messaging
                     </p>

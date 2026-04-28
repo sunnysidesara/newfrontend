@@ -107,9 +107,6 @@ export default function PartnersPage() {
         try {
           const results = await searchUsers("", roleFilter);
           setSearchResults(results);
-        } catch (error) {
-          console.error("Error fetching filtered users:", error);
-          setSearchResults([]);
         } finally {
           setSearching(false);
           setFilterChanging(false);
@@ -418,7 +415,7 @@ export default function PartnersPage() {
                       <div className={styles.userCardRight}>
                         {u.is_partner ? (
                           <span className={styles.partnerBadge}>
-                            <UserCheck size={14} /> Partner
+                            <UserCheck size={14} />
                           </span>
                         ) : u.is_request_sent ? (
                           <button
@@ -431,9 +428,9 @@ export default function PartnersPage() {
                             {actionLoading === u.partnership_id ? (
                               <Loader2 size={14} className={styles.spin} />
                             ) : (
-                              <XCircle size={14} />
+                              <X size={14} />
                             )}
-                            Cancel Request
+                            Cancel
                           </button>
                         ) : u.is_request_received ? (
                           <div className={styles.actionBtns}>
@@ -576,20 +573,22 @@ export default function PartnersPage() {
                           </div>
                         </div>
                         <div className={styles.userCardRight}>
-                          <button
-                            className={styles.acceptBtn}
-                            onClick={() => handleAcceptRequest(req.id)}
-                            disabled={actionLoading === req.id}
-                          >
-                            <Check size={14} /> Accept
-                          </button>
-                          <button
-                            className={styles.declineBtn}
-                            onClick={() => handleDeclineRequest(req.id)}
-                            disabled={actionLoading === req.id}
-                          >
-                            <X size={14} /> Decline
-                          </button>
+                          <div className={styles.actionBtns}>
+                            <button
+                              className={styles.acceptBtn}
+                              onClick={() => handleAcceptRequest(req.id)}
+                              disabled={actionLoading === req.id}
+                            >
+                              <Check size={14} /> Accept
+                            </button>
+                            <button
+                              className={styles.declineBtn}
+                              onClick={() => handleDeclineRequest(req.id)}
+                              disabled={actionLoading === req.id}
+                            >
+                              <X size={14} /> Decline
+                            </button>
+                          </div>
                         </div>
                       </div>
                     ))}
@@ -635,9 +634,9 @@ export default function PartnersPage() {
                             {actionLoading === req.id ? (
                               <Loader2 size={14} className={styles.spin} />
                             ) : (
-                              <XCircle size={14} />
+                              <X size={14} />
                             )}
-                            Cancel Request
+                            Cancel
                           </button>
                         </div>
                       </div>

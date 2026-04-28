@@ -535,7 +535,7 @@
   border-color: #fecaca;
 }
 .dangerTitle {
-  color: #dc2626;
+  color: #2e0707;
   border-bottom-color: #fecaca;
 }
 .dangerRow {
@@ -560,16 +560,19 @@
   color: #888888;
 }
 .dangerBtn {
-  padding: 8px 20px;
-  background: transparent;
-  border: 1px solid #fecaca;
+  padding: 8px 15px;
+  background: black;
+  border: 1px solid #fecaca00;
   border-radius: 8px;
   font-size: 13px;
-  color: #dc2626;
+  font-weight: 600;
+  color: #f0eaea;
   cursor: pointer;
 }
 .dangerBtn:hover {
-  background: #fef2f2;
+  background: #f9f8f8;
+  color: black;
+  border: 1px solid #000000;
 }
 
 /* Modal */
@@ -711,13 +714,17 @@
 }
 .deleteAccountBtn {
   padding: 8px 20px;
-  background: #dc2626;
+  background: #050101;
   border: none;
   border-radius: 8px;
   color: white;
   font-size: 13px;
   font-weight: 600;
   cursor: pointer;
+}
+
+.deleteAccountBtn:hover {
+  background: #333333;
 }
 
 /* Responsive */

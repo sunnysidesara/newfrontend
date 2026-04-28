@@ -504,38 +504,83 @@
   background: #333333;
   transform: translateY(-2px);
 }
+
+/* Action Buttons Container - Make them horizontal */
+.actionBtns {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 8px;
+}
+
 .acceptBtn {
-  display: flex;
+  display: inline-flex;
   align-items: center;
-  gap: 5px;
-  padding: 8px 16px;
-  background: #f0fdf4;
-  color: #166534;
-  border: 1px solid #bbf7d0;
+  gap: 6px;
+  padding: 6px 16px;
+  background: #011c13;
+  color: white;
+  border: none;
   border-radius: 8px;
   cursor: pointer;
+  font-size: 13px;
+  font-weight: 500;
+  transition: all 0.2s ease;
 }
+
+.acceptBtn:hover:not(:disabled) {
+  background: #a0b3ad;
+  transform: translateY(-1px);
+}
+
 .declineBtn {
-  display: flex;
+  display: inline-flex;
   align-items: center;
-  gap: 5px;
-  padding: 8px 16px;
-  background: #fef2f2;
-  color: #dc2626;
-  border: 1px solid #fecaca;
+  gap: 6px;
+  padding: 6px 16px;
+  background: #f4f0f0;
+  color: rgb(0, 0, 0);
+  border: none;
   border-radius: 8px;
   cursor: pointer;
+  font-size: 13px;
+  font-weight: 500;
+  transition: all 0.2s ease;
 }
+
+.declineBtn:hover:not(:disabled) {
+  background: #b3a7a7;
+  transform: translateY(-1px);
+}
+
+.acceptBtn:disabled,
+.declineBtn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* For the user card right container */
+.userCardRight {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-shrink: 0;
+}
+
 .msgBtn {
   display: flex;
   align-items: center;
   gap: 5px;
-  padding: 8px 16px;
+  padding: 5px 9px;
   background: #f5f5f5;
-  color: #333333;
-  border: 1px solid #e0e0e0;
+  color: #020101;
+  border: 1px solid #0e0404;
   border-radius: 8px;
   cursor: pointer;
+  font-size: 13px;
+  font-weight: 500;
+  transition: all 0.2s ease;
 }
 .removeBtn {
   display: flex;
@@ -543,22 +588,51 @@
   gap: 5px;
   padding: 8px 12px;
   background: transparent;
-  color: #dc2626;
-  border: 1px solid #fecaca;
+  color: #0a0101;
+  border: 1px solid #000000;
   border-radius: 8px;
   cursor: pointer;
 }
+
+.msgBtn:hover:not(:disabled) {
+  background: #060303;
+  color: white;
+  transform: translateY(-1px);
+}
+
+.removeBtn:hover:not(:disabled) {
+  background: #000000;
+  color: #f5f5f5;
+  transform: translateY(-1px);
+}
+
 .cancelBtn,
 .cancelSentBtn {
   display: flex;
   align-items: center;
   gap: 6px;
-  padding: 8px 16px;
-  background: #f8f5f5;
-  color: #480101;
-  border: 1px solid #000000;
+  padding: 6px 16px;
+  background: #f4f0f0;
+  color: #020000;
+  border: 1px solid #7d727200;
   border-radius: 8px;
   cursor: pointer;
+  font-size: 13px;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.cancelBtn:hover:not(:disabled),
+.cancelSentBtn:hover:not(:disabled) {
+  background: #b3a7a7;
+  transform: translateY(-1px);
+}
+
+.cancelBtn:disabled,
+.cancelSentBtn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
 }
 
 /* Fullscreen centered loader */
